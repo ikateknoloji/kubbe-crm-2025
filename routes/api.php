@@ -9,6 +9,7 @@ use App\Http\Controllers\V1\Auth\RoleController;
 use App\Http\Controllers\V1\Product\ProductCategoryController;
 use App\Http\Controllers\V1\Product\StockController;
 use App\Http\Controllers\V1\Product\CategoryProductController;
+use App\Http\Controllers\V1\Manufacturer\ManufacturerController;
 
 
 /**
@@ -56,3 +57,5 @@ Route::prefix('v1/product')->group(function () {
     Route::get('categories/{id}/product-types', [CategoryProductController::class, 'getProductTypesByCategory']);
     Route::post('stocks/find', [CategoryProductController::class, 'getStockByProductTypeAndColor']);
 });
+
+Route::apiResource('v1/manufacturers', ManufacturerController::class);

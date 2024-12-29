@@ -69,4 +69,13 @@ class User extends Authenticatable
             ? asset('storage/' . $this->profile_photo)
             : null;
     }
+
+    /**
+     * Kullanıcının müşteri olarak sahip olduğu siparişler
+     */
+    public function customerOrders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+    
 }
