@@ -20,4 +20,12 @@ class Stock extends Model
     {
         return $this->belongsTo(Color::class, 'color_id');
     }
+
+    /**
+     * Get the order items associated with the stock.
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'stock_id');
+    }
 }

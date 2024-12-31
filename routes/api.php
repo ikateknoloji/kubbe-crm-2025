@@ -10,6 +10,7 @@ use App\Http\Controllers\V1\Product\ProductCategoryController;
 use App\Http\Controllers\V1\Product\StockController;
 use App\Http\Controllers\V1\Product\CategoryProductController;
 use App\Http\Controllers\V1\Manufacturer\ManufacturerController;
+use App\Http\Controllers\V1\Order\StoreController;
 
 
 /**
@@ -59,3 +60,15 @@ Route::prefix('v1/product')->group(function () {
 });
 
 Route::apiResource('v1/manufacturers', ManufacturerController::class);
+
+Route::prefix('v1/orders')->group(function () {
+    Route::post('/store', [StoreController::class, 'store'])->middleware('auth:sanctum');
+    Route::post('/validate-forms', [StoreController::class, 'validateForms']);
+    Route::post('/validate-order-item', [StoreController::class, 'validateOrderItem']);
+    Route::post('/validate-bulk-order-items', [StoreController::class, 'validateBulkOrderItems']);
+    Route::post('/validate-invoice', [StoreController::class, 'validateInvoice']);
+    Route::post('/upload-order-image', [StoreController::class, 'uploadOrderImage']);
+    Route::post('/delete-order-image', [StoreController::class, 'deleteOrderImage']);
+    Route::post('/upload-payment-receipt', [StoreController::class, 'uploadPaymentReceipt']);
+    Route::post('/revert-payment-receipt', [StoreController::class, 'revertPaymentReceipt']);
+});
