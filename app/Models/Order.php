@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Order extends Model
 {
@@ -54,10 +56,12 @@ class Order extends Model
         return $this->hasMany(OrderBasket::class, 'order_id');
     }
 
+
     public function paymentReceipts()
     {
         return $this->hasMany(OrderPaymentReceipt::class);
     }
+
 
     /**
      * İlişkiler: Fatura Bilgileri.
@@ -69,5 +73,33 @@ class Order extends Model
     public function invoiceInfo()
     {
         return $this->hasOne(InvoiceInfo::class);
+    }
+
+    public function shippingAddress()
+    {
+        return $this->hasOne(ShippingAddress::class, 'order_id');
+    }
+
+    public function orderImages()
+    {
+        return $this->hasMany(OrderImage::class, 'order_id');
+    }
+    
+    public function scopeOrderByEnumStatus($query, $direction = 'asc')
+    {
+        return $query->orderByRaw("FIELD(status, '" . implode("','", OrderStatus::order()) . "') $direction");
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return $this->status->label();
+    }
+
+    /**
+    * Get all the order logos associated with the order through order baskets.
+    */
+    public function orderLogos()
+    {
+        return $this->hasManyThrough(OrderLogo::class, OrderBasket::class, 'order_id', 'order_basket_id');
     }
 }

@@ -19,18 +19,20 @@ class OrderBasket extends Model
     }
 
     /**
-     * Get the items associated with the order basket.
+     * Get the single order item associated with the basket.
      */
-    public function orderItems()
+    public function orderItem()
     {
-        return $this->hasMany(OrderItem::class, 'order_basket_id');
+        return $this->hasOne(OrderItem::class, 'order_basket_id');
     }
-
+    
+    
     /**
      * Get the logos associated with the order basket.
      */
     public function orderLogos()
     {
         return $this->hasMany(OrderLogo::class, 'order_basket_id');
-    }  
+    }
+    
 }

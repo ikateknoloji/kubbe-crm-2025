@@ -22,12 +22,13 @@ class OrderItem extends Model
     ];
 
     /**
-     * Get the order basket that owns the order item.
+     * Get the basket that owns the order item.
      */
     public function orderBasket()
     {
         return $this->belongsTo(OrderBasket::class, 'order_basket_id');
     }
+    
 
     /**
      * Get the stock associated with the order item.
