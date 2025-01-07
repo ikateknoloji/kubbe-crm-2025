@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\V1\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 use App\Models\Role;
 use App\Models\User;
@@ -19,45 +22,23 @@ class AuthController extends Controller
 {
     /**
      * Kullanıcı kaydı oluşturma işlemi.
-     * @param \Illuminate\Http\Request $request
-     * @return mixed|\Illuminate\Http\JsonResponse
+     * @param $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                new PasswordRule,
-            ],
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'role_ids' => 'required|array',
-            'role_ids.*' => 'exists:roles,id',
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Doğrulama hatası.',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-    
         $profilePhotoPath = null;
         if ($request->hasFile('profile_image')) {
             $profilePhotoPath = $this->storeProfileImage($request->file('profile_image'));
         }
-    
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password'      => Hash::make($request->password),
             'profile_photo' => $profilePhotoPath,
         ]);
-    
+
         $roles = Role::whereIn('id', $request->role_ids)->get();
         foreach ($roles as $role) {
             $user->roles()->attach($role->id, [
@@ -65,10 +46,10 @@ class AuthController extends Controller
                 'updated_at' => now(),
             ]);
         }
-    
+
         return response()->json([
             'message' => 'Kullanıcı başarıyla kaydedildi.',
-            'user' => $user,
+            'user'    => $user,
         ], 201);
     }
 
@@ -77,28 +58,23 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request): JsonResponse
     {
-        $validatedData = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'device_name' => 'nullable|string',
-        ]);
+        $credentials = $request->only('email', 'password');
 
-        $user = User::where('email', $validatedData['email'])->first();
-
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['Giriş bilgileri yanlış.'],
             ]);
         }
 
-        $deviceName = $validatedData['device_name'] ?? 'unknown device';
+        $user = Auth::user();
+        $deviceName = $request->input('device_name', 'unknown device');
         $roles = $user->roles->pluck('name');
         $token = $user->createToken($deviceName)->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user'  => $user,
             'roles' => $roles,
             'token' => $token,
         ], 200);
