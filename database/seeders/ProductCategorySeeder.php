@@ -15,8 +15,8 @@ class ProductCategorySeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Mikrofon Süngeri'],
-            ['name' => 'Reklam Küpü'],
+            ['category' => 'Mikrofon Süngeri'],
+            ['category' => 'Reklam Küpü'],
         ];
 
         foreach ($categories as $category) {

@@ -16,19 +16,19 @@ class ProductTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['product_type' => 'Üçgen', 'name' => 'Mikrofon Süngeri'],
-            ['product_type' => 'Dörtgen', 'name' => 'Mikrofon Süngeri'],
-            ['product_type' => 'Silindir', 'name' => 'Mikrofon Süngeri'],
-            ['product_type' => 'Kısa Silindir', 'name' => 'Mikrofon Süngeri'],
-            ['product_type' => 'Top', 'name' => 'Mikrofon Süngeri'],
-            ['product_type' => 'Üçgen Sünger', 'name' => 'Reklam Küpü'],
-            ['product_type' => 'Dörtgen Sünger', 'name' => 'Reklam Küpü'],
-            ['product_type' => 'Plastik Üçgen', 'name' => 'Reklam Küpü'],
-            ['product_type' => 'Plastik Kare', 'name' => 'Reklam Küpü'],
+            ['product_type' => 'Üçgen', 'category' => 'Mikrofon Süngeri'],
+            ['product_type' => 'Dörtgen', 'category' => 'Mikrofon Süngeri'],
+            ['product_type' => 'Silindir', 'category' => 'Mikrofon Süngeri'],
+            ['product_type' => 'Kısa Silindir', 'category' => 'Mikrofon Süngeri'],
+            ['product_type' => 'Top', 'category' => 'Mikrofon Süngeri'],
+            ['product_type' => 'Üçgen Sünger', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Dörtgen Sünger', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Plastik Üçgen', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Plastik Kare', 'category' => 'Reklam Küpü'],
         ];
 
         foreach ($types as $type) {
-            $name = ProductCategory::firstOrCreate(['name' => $type['name']]);
+            $name = ProductCategory::firstOrCreate(['category' => $type['category']]);
             ProductType::firstOrCreate([
                 'product_type' => $type['product_type'],
                 'product_category_id' => $name->id,
