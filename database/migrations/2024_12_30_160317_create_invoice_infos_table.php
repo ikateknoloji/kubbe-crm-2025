@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('tax_office')->nullable();
             $table->string('tax_number', 20)->nullable();
             $table->string('email')->nullable();            
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
             $table->timestamps();
         });
     }

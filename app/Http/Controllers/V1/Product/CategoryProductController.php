@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\V1\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Stock\StockResource;
 use Illuminate\Http\Request;
 
 use App\Models\ProductCategory;
@@ -52,17 +53,12 @@ class CategoryProductController extends Controller
             'product_type' => 'required|string',
             'color_name' => 'required|string',
         ]);
-
-        $stock = Stock::whereHas('productType', function ($query) use ($validated) {
-            $query->where('product_type', $validated['product_type']);
-        })->whereHas('color', function ($query) use ($validated) {
-            $query->where('color_name', $validated['color_name']);
-        })->with(['productType', 'color'])->first();
-
-        if (!$stock) {
-            return response()->json(['message' => 'Bu ürün tipi ve renkle eşleşen stok bulunamadı.'], 404);
-        }
-
-        return response()->json(['data' => $stock], 200);
+    
+        $stock = Stock::whereRelation('productType', 'product_type', $validated['product_type'])
+                      ->whereRelation('color', 'color_name', $validated['color_name'])
+                      ->with(['productType', 'color'])
+                      ->firstOrFail();
+    
+        return response()->json(new StockResource($stock), 200);
     }
 }
