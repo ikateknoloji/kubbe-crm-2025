@@ -5,19 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrderPaymentReceipt extends Model
+class ManufacturerOrder extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_id', 'file_path'];
+    protected $fillable = [
+        'order_id',
+        'total_amount', 
+    ];
 
     /**
-     * Sipariş ile birebir ilişki.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * İlişki: Bir üretici siparişi bir siparişe aittir.
      */
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
+    
 }

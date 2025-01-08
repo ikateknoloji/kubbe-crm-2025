@@ -5,16 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OrderPaymentReceipt extends Model
+class CustomerOrder extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['order_id', 'file_path'];
+    protected $fillable = [
+        'order_id',
+        'average_unit_price',
+        'total_price',
+        'total_amount',
+    ];
 
     /**
-     * Sipariş ile birebir ilişki.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * İlişki: Bir müşteri siparişi bir siparişe aittir.
      */
     public function order()
     {

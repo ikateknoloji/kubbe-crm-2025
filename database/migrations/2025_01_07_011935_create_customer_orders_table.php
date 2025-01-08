@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_payment_receipts', function (Blueprint $table) {
+        Schema::create('customer_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('order_id')->unique()->constrained('orders')->onDelete(action: 'cascade'); 
-            $table->string('file_path');
+            $table->unsignedBigInteger('total_amount'); 
+            $table->decimal('average_unit_price', 10, 2);
+            $table->decimal('total_price', 12, 2);
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_payment_receipts');
+        Schema::dropIfExists('customer_orders');
     }
 };

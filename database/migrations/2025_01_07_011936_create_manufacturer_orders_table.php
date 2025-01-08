@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_payment_receipts', function (Blueprint $table) {
+        Schema::create('manufacturer_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('manufacturer_id')->constrained('manufacturers')->onDelete('cascade');
             $table->foreignId('order_id')->unique()->constrained('orders')->onDelete(action: 'cascade'); 
-            $table->string('file_path');
+            $table->unsignedBigInteger('total_amount'); 
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_payment_receipts');
+        Schema::dropIfExists('manufacturer_orders');
     }
 };

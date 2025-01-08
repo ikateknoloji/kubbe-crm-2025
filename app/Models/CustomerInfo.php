@@ -18,11 +18,11 @@ class CustomerInfo extends Model
         'name',
         'email',
         'phone',
-        'address',
+        'order_id'
     ];
 
-    public function orders()
+    public function order()
     {
-        return $this->hasMany(Order::class);
-    }
+        return $this->hasOne(Order::class);
+    }    
 }

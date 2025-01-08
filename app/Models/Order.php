@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\OrderHelper;
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,44 +33,48 @@ class Order extends Model
         'manufacturer_id',
     ];
 
-    /**
-     * Get the customer associated with the order.
-     */
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            OrderHelper::createCustomerOrder($order);
+
+            if ($order->manufacturer_id) {
+                OrderHelper::createManufacturerOrder($order);
+            }
+        });
+
+        static::updated(function ($order) {
+            if ($order->isDirty('manufacturer_id') && $order->manufacturer_id) {
+                OrderHelper::createManufacturerOrder($order);
+            }
+        });
+    }
+
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
     }
 
-    /**
-     * Get the manufacturer associated with the order.
-     */
     public function manufacturer()
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
+    
+    public function customerInfo()
+    {
+        return $this->belongsTo(CustomerInfo::class, 'order_id');
+    }
 
-    /**
-     * Get the order baskets associated with the order.
-     */
     public function orderBaskets()
     {
         return $this->hasMany(OrderBasket::class, 'order_id');
     }
 
-
-    public function paymentReceipts()
+    public function paymentReceipt()
     {
-        return $this->hasMany(OrderPaymentReceipt::class);
+        return $this->hasOne(OrderPaymentReceipt::class);
     }
 
-
-    /**
-     * İlişkiler: Fatura Bilgileri.
-     *
-     * Bir siparişin bir fatura bilgisi olabilir.
-     * 
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
     public function invoiceInfo()
     {
         return $this->hasOne(InvoiceInfo::class);
@@ -95,11 +100,13 @@ class Order extends Model
         return $this->status->label();
     }
 
-    /**
-    * Get all the order logos associated with the order through order baskets.
-    */
     public function orderLogos()
     {
         return $this->hasManyThrough(OrderLogo::class, OrderBasket::class, 'order_id', 'order_basket_id');
+    }
+
+    public function orderItems()
+    {
+        return $this->hasManyThrough(OrderItem::class, OrderBasket::class, 'order_id', 'order_basket_id', 'id', 'id');
     }
 }

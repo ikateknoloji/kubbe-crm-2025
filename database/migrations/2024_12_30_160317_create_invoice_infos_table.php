@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoice_infos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
+            $table->foreignId('order_id')->unique()->constrained('orders')->onDelete(action: 'cascade'); 
             $table->enum('invoice_type', ['C', 'I'])->comment('C: Individual, I: Corporate');
             $table->string('company_name')->nullable();
             $table->string('name')->nullable();
