@@ -53,12 +53,13 @@ class CategoryProductController extends Controller
             'product_type' => 'required|string',
             'color_name' => 'required|string',
         ]);
+
     
         $stock = Stock::whereRelation('productType', 'product_type', $validated['product_type'])
                       ->whereRelation('color', 'color_name', $validated['color_name'])
                       ->with(['productType', 'color'])
                       ->firstOrFail();
-    
+
         return response()->json(new StockResource($stock), 200);
     }
 }

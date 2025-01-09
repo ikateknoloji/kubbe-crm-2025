@@ -28,4 +28,26 @@ class Stock extends Model
     {
         return $this->hasMany(OrderItem::class, 'stock_id');
     }
+
+    /**
+     * Scope a query to filter stocks by product type and color name.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string|null $productType
+     * @param string|null $colorName
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFilter($query, $productType = null, $colorName = null)
+    {
+        return $query->when($productType, function ($q, $productType) {
+                return $q->whereHas('productType', function ($q) use ($productType) {
+                    $q->where('product_type', $productType);
+                });
+            })
+            ->when($colorName, function ($q, $colorName) {
+                return $q->whereHas('color', function ($q) use ($colorName) {
+                    $q->where('color_name', $colorName);
+                });
+            });
+    }
 }

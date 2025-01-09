@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\V1\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StockIndexRequest;
+use App\Http\Requests\Stok\StoreStockRequest;
+use App\Http\Resources\Stock\StockResource;
 use App\Models\Color;
 use App\Models\Stock;
 use Illuminate\Http\Request;
@@ -21,38 +24,19 @@ class StockController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(StockIndexRequest $request)
     {
-        $validator = Validator::make($request->query(), [
-            'product_type' => 'nullable|string|max:255',
-            'color_name' => 'nullable|string|max:255',
-        ]);
-    
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-    
-        $productType = $request->query('product_type');
-        $colorName = $request->query('color_name');
-    
-        $query = Stock::query()
-            ->with(['productType', 'color'])
-            ->where('quantity', '>', 0);
-    
-        if ($productType) {
-            $query->whereHas('productType', function ($q) use ($productType) {
-                $q->where('product_type', $productType);
-            });
-        }
-    
-        if ($colorName) {
-            $query->whereHas('color', function ($q) use ($colorName) {
-                $q->where('color_name', $colorName);
-            });
-        }
-    
-        $stocks = $query->paginate(10); 
-        return response()->json(['data' => $stocks], 200);
+        $validated = $request->validated();
+
+        $productType = $validated['product_type'] ?? null;
+        $colorName = $validated['color_name'] ?? null;
+
+        $stocks = Stock::with(['productType.productCategory', 'color'])
+            ->where('quantity', '>', 0)
+            ->filter($productType, $colorName)
+            ->paginate(10);
+
+        return StockResource::collection($stocks)->response()->getData(true);
     }
 
     /**
@@ -60,14 +44,10 @@ class StockController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(StoreStockRequest $request)
     {
-        $validated = $request->validate([
-            'product_type_id' => 'required|exists:product_types,id',
-            'color_name' => 'required|string|max:255',
-            'color_hex' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'quantity' => 'required|integer|min:0',
-        ]);
+        $validated = $request->validated();
+
 
         $color = Color::firstOrCreate(
             ['color_name' => $validated['color_name']],
@@ -185,36 +165,35 @@ class StockController extends Controller
     }
     
     /**
-     * Stok miktarı 0 olan ürünleri listele.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+     * Stok miktarı 0 olan ürünleri listele (Resource + Pagination)
+ * @param Request $request
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function zeroStock(Request $request)
     {
         $stocks = Stock::query()
-            ->with(['productType', 'color']) 
-            ->where('quantity', '=', 0) 
-            ->get();
-
-        return response()->json(['data' => $stocks], 200);
+            ->with(['productType.productCategory', 'color'])
+            ->where('quantity', '=', 0)
+            ->paginate(10); // Sayfalama ekledik
+    
+        return StockResource::collection($stocks)->response()->getData(true);
     }
-
+    
     /**
-     * Stok miktarı kritik seviyenin altında olan ürünleri listele.
+     * Stok miktarı kritik seviyenin altında olan ürünleri listele (Resource + Pagination)
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function lowStock(Request $request)
     {
-        $criticalStockLevel = config('stock.critical_stock_level');
-
-        $stocks = Stock::query()
-            ->with(['productType', 'color'])
-            ->where('quantity', '<', $criticalStockLevel)
-            ->get();
+        $criticalStockLevel = config('stock.critical_stock_level', 5); // Default değeri 5
     
-        // Sonuçları döndür
-        return response()->json(['data' => $stocks], 200);
+        $stocks = Stock::query()
+            ->with(['productType.productCategory', 'color'])
+            ->where('quantity', '<', $criticalStockLevel)
+            ->paginate(10); // Sayfalama ekledik
+        
+        return StockResource::collection($stocks)->response()->getData(true);
     }
 
     /**
