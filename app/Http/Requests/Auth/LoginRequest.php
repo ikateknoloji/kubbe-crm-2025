@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class LoginRequest extends FormRequest
 {
@@ -42,5 +44,21 @@ class LoginRequest extends FormRequest
             'password.string'   => 'Şifre metin olmalıdır.',
             'device_name.string' => 'Cihaz adı metin olmalıdır.',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Doğrulama Hataları.',
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }

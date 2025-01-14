@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Rules\PasswordRule;
 
 class RegisterRequest extends FormRequest
@@ -65,5 +67,21 @@ class RegisterRequest extends FormRequest
             'role_ids.array'         => 'Rol ID\'leri dizi formatında olmalıdır.',
             'role_ids.*.exists'      => 'Seçilen rol ID\'lerinden biri geçersiz.',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Doğrulama Hataları.',
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }
