@@ -32,23 +32,11 @@ class Order extends Model
         'customer_id',
         'manufacturer_id',
     ];
+    
+    protected $casts = [
+        'status' => OrderStatus::class,
+    ];
 
-    protected static function booted()
-    {
-        static::created(function ($order) {
-            OrderHelper::createCustomerOrder($order);
-
-            if ($order->manufacturer_id) {
-                OrderHelper::createManufacturerOrder($order);
-            }
-        });
-
-        static::updated(function ($order) {
-            if ($order->isDirty('manufacturer_id') && $order->manufacturer_id) {
-                OrderHelper::createManufacturerOrder($order);
-            }
-        });
-    }
 
     public function customer()
     {

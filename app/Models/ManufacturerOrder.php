@@ -12,6 +12,7 @@ class ManufacturerOrder extends Model
     protected $fillable = [
         'order_id',
         'total_amount', 
+        'manufacturer_id'
     ];
 
     /**

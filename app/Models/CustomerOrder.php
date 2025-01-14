@@ -14,6 +14,7 @@ class CustomerOrder extends Model
         'average_unit_price',
         'total_price',
         'total_amount',
+        'customer_id'
     ];
 
     /**
