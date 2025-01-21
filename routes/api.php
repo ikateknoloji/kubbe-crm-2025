@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\V1\Bill\InvoicedOrderController;
+use App\Http\Controllers\V1\Order\DesingerGetController;
+use App\Http\Controllers\V1\Shipping\GetShippingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -11,7 +14,16 @@ use App\Http\Controllers\V1\Product\StockController;
 use App\Http\Controllers\V1\Product\CategoryProductController;
 use App\Http\Controllers\V1\Manufacturer\ManufacturerController;
 use App\Http\Controllers\V1\Order\StoreController;
-
+use App\Http\Controllers\V1\Order\GetOrderController;
+use App\Http\Controllers\V1\Bill\BillController;
+use App\Http\Controllers\V1\Bill\UninvoicedOrderController;
+use App\Http\Controllers\V1\Image\RevertImageController;
+use App\Http\Controllers\V1\Image\ImageController;
+use App\Http\Controllers\V1\Manage\OrderManageController;
+use App\Http\Controllers\V1\Order\CustomerGetController;
+use App\Http\Controllers\V1\Product\ColorController;
+use App\Http\Controllers\V1\Shipping\StoreShippingController;
+use App\Http\Controllers\V1\Product\ProductTypeController;
 
 /**
  * API Routes
@@ -37,9 +49,16 @@ Route::prefix('v1/auth')->group(function () {
    });
 });
 
-
 Route::prefix('v1/product')->group(function () {
     Route::apiResource('categories', ProductCategoryController::class);
+    Route::apiResource('types', ProductTypeController::class);
+    Route::apiResource('colors', ColorController::class);
+});
+
+Route::prefix('v1/product')->group(function () {
+    Route::get('categories-all', [CategoryProductController::class, 'getAllCategories']);
+    Route::get('categories-all/{id}/product-types', [CategoryProductController::class, 'getProductTypesByCategory']);
+    Route::post('stocks-items', [CategoryProductController::class, 'getStockByProductTypeAndColor']);
 });
 
 Route::prefix('v1/product')->group(function () {
@@ -53,12 +72,6 @@ Route::prefix('v1/product')->group(function () {
     Route::delete('stocks/{id}', [StockController::class, 'destroy']);
 });
 
-Route::prefix('v1/product')->group(function () {
-    Route::get('categories', [CategoryProductController::class, 'getAllCategories']);
-    Route::get('categories/{id}/product-types', [CategoryProductController::class, 'getProductTypesByCategory']);
-    Route::post('stocks/find', [CategoryProductController::class, 'getStockByProductTypeAndColor']);
-});
-
 Route::apiResource('v1/manufacturers', ManufacturerController::class);
 
 Route::prefix('v1/orders')->group(function () {
@@ -67,8 +80,59 @@ Route::prefix('v1/orders')->group(function () {
     Route::post('/validate-order-item', [StoreController::class, 'validateOrderItem']);
     Route::post('/validate-bulk-order-items', [StoreController::class, 'validateBulkOrderItems']);
     Route::post('/validate-invoice', [StoreController::class, 'validateInvoice']);
-    Route::post('/upload-order-image', [StoreController::class, 'uploadOrderImage']);
-    Route::post('/delete-order-image', [StoreController::class, 'deleteOrderImage']);
-    Route::post('/upload-payment-receipt', [StoreController::class, 'uploadPaymentReceipt']);
-    Route::post('/revert-payment-receipt', [StoreController::class, 'revertPaymentReceipt']);
+
+    Route::controller(GetOrderController::class)->group(function () {
+        Route::get('/get-orders', 'index');
+        Route::get('/get-orders/{id}', 'show');
+    });
+
+});
+
+Route::prefix('v1/designer-orders')->group(function () {
+    Route::get('/', [DesingerGetController::class, 'index']); 
+    Route::get('/{id}', [DesingerGetController::class, 'show']); 
+});
+
+Route::prefix('v1/customer-orders')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [CustomerGetController::class, 'index']);
+    Route::get('/{id}', [CustomerGetController::class, 'show']);
+});
+
+
+Route::prefix('v1/orders/manage')->group(function () {
+    Route::post('/approve', [OrderManageController::class, 'approveOrder']);
+    Route::post('/prepare-for-shipping', [OrderManageController::class, 'prepareForShipping']);
+    Route::post('/assign-manufacturer', [OrderManageController::class, 'assignManufacturer']);
+});
+
+Route::prefix('v1/bill')->group(function () {
+    Route::get('/uninvoiced-orders', [UninvoicedOrderController::class, 'getUninvoicedOrders'])->middleware('auth:sanctum');
+    Route::get('/uninvoiced-orders/{id}', [UninvoicedOrderController::class, 'getSingleUninvoicedOrder'])->middleware('auth:sanctum');
+    Route::post('/store/{orderId}', [BillController::class, 'store']);
+    Route::put('/update/{orderId}', [BillController::class, 'update']);
+    Route::get('/invoiced-orders', [InvoicedOrderController::class, 'getInvoicedOrders'])->middleware('auth:sanctum');
+    Route::get('/invoiced-orders/{id}', [InvoicedOrderController::class, 'getSingleInvoicedOrder']);
+});
+
+Route::prefix('v1/shipping')->group(function () {
+    Route::post('/orders/{orderId}/details-with-images', [StoreShippingController::class, 'storeOrderDetails']);
+    Route::put('/orders/{orderId}/update-details', [StoreShippingController::class, 'updateOrderDetails']);
+    Route::post('/orders/{orderId}/add-image', [StoreShippingController::class, 'addOrderImage']);
+    Route::delete('/orders/images/{imageId}', [StoreShippingController::class, 'removeOrderImage']);
+});
+
+Route::prefix('v1/shipping')->middleware('auth:sanctum')->group(function () {
+    Route::get('/orders/pending', [GetShippingController::class, 'getPendingShippingOrders'])->name('shipping.pending');
+    Route::get('/orders/shipped', [GetShippingController::class, 'getShippedOrders'])->name('shipping.shipped');
+});
+
+Route::prefix('v1/images')->group(function () {
+    
+    Route::post('/upload-order-logo', [ImageController::class, 'uploadOrderLogo']);
+    Route::post('/upload-payment-receipt', [ImageController::class, 'uploadPaymentReceipt']);
+    Route::post('/upload-shipping-image', [ImageController::class, 'uploadShippingImage']);
+    
+    Route::post('/revert-order-logo', [RevertImageController::class, 'revertOrderLogo']);
+    Route::post('/revert-payment-receipt', [RevertImageController::class, 'revertPaymentReceipt']);
+    Route::post('/revert-shipping-image', [RevertImageController::class, 'revertShippingImage']);
 });
