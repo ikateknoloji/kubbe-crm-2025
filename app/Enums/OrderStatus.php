@@ -34,7 +34,7 @@ enum OrderStatus: string
         return match ($this) {
             self::OC => 'Sipariş Oluşturuldu',
             self::PRP => 'Hazırlanıyor',
-            self::RFP => 'Teslimata Hazır',
+            self::RFP => 'Üretici Seçiminde',
             self::P => 'Üretimde',
             self::SHP => 'Kargo',
             self::PD => 'Teslim Edildi',
