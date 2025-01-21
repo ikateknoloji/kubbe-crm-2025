@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('customer_infos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->unique()->constrained('orders')->onDelete(action: 'cascade'); 
+            $table->foreignId('order_id')->unique()->constrained('orders')->onDelete('cascade');
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->timestamps();
         });

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('surname')->nullable();
             $table->string('tc_number', 11)->nullable();
-            $table->string('address')->nullable();
+            $table->string('address', 500)->nullable();
             $table->string('tax_office')->nullable();
             $table->string('tax_number', 20)->nullable();
             $table->string('email')->nullable();            

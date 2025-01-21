@@ -50,7 +50,7 @@ class Order extends Model
     
     public function customerInfo()
     {
-        return $this->belongsTo(CustomerInfo::class, 'order_id');
+        return $this->hasOne(CustomerInfo::class, 'order_id');
     }
 
     public function orderBaskets()

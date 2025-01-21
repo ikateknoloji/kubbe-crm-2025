@@ -15,14 +15,14 @@ class CustomerInfo extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'order_id'
+        'order_id', 'name', 'email', 'phone'
     ];
 
+    /**
+     * Order ilişkisi (belongsTo).
+     */
     public function order()
     {
-        return $this->hasOne(Order::class);
-    }    
+        return $this->belongsTo(Order::class, 'order_id');
+    }
 }
