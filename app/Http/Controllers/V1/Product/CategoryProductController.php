@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1\Product;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Stock\StockResource;
+use App\Models\Color;
 use Illuminate\Http\Request;
 
 use App\Models\ProductCategory;
@@ -20,8 +21,14 @@ class CategoryProductController extends Controller
     public function getAllCategories()
     {
         $categories = ProductCategory::all();
+        $colors = Color::all();
 
-        return response()->json(['data' => $categories], 200);
+        return response()->json([
+            'data' => [
+                'categories' => $categories,
+                'colors'     => $colors,
+            ]
+        ], 200);
     }
 
     /**
