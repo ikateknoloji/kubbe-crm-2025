@@ -20,7 +20,9 @@ class SingleOrderResource extends JsonResource
             'customer' => $this->whenLoaded('customer', function () {
                 return new CustomerResource($this->customer);
             }),
-
+            'customer_info' => $this->whenLoaded('customerInfo', function () {
+                return new CustomerInfoResource($this->customerInfo);
+            }),
             'manufacturer' => $this->whenLoaded('manufacturer', function () {
                 return new ManufacturerResource($this->manufacturer);
             }),

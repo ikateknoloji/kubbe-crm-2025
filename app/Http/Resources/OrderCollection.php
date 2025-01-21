@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
@@ -30,6 +31,10 @@ class OrderCollection extends ResourceCollection
                 'to' => $this->lastItem(),
                 'links' => $this->linkCollection(),
             ],
+            'order_statuses' => array_map(fn(OrderStatus $status) => [
+                'value' => $status->value,
+                'label' => $status->label(),
+            ], OrderStatus::cases()),
         ];
     }
 

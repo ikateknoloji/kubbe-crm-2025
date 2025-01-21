@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Enums\OrderStatus;
 
 class OrderDefaultResource extends JsonResource
 {
@@ -27,8 +28,20 @@ class OrderDefaultResource extends JsonResource
             'offer_price' => $this->offer_price,
             'customer_id' => $this->customer_id,
             'manufacturer_id' => $this->manufacturer_id,
+            'status_label' => $this->getStatusLabel(), 
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    
+    private function getStatusLabel(): string
+    {
+        if ($this->status instanceof OrderStatus) {
+            return $this->status->label();
+        }
+    
+        $statusEnum = OrderStatus::tryFrom($this->status);
+        return $statusEnum ? $statusEnum->label() : 'Bilinmeyen Durum';
     }
 }

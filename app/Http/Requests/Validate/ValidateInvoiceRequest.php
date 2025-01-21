@@ -32,8 +32,17 @@ class ValidateInvoiceRequest extends FormRequest
             'address'      => 'required|max:500',
             'tax_office'   => 'required_if:invoice_type,I|max:255',
             'tax_number'   => 'required_if:invoice_type,I|max:50',
-            'email'        => 'required|email|max:255',
+            'email'        => 'nullable|email|max:255',
         ];
+    }
+
+    protected function withValidator(Validator $validator)
+    {
+        $validator->after(function ($validator) {
+            if (empty($this->all())) {
+                $validator->errors()->add('form', 'Form verileri gönderilmedi.');
+            }
+        });
     }
 
     /**
