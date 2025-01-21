@@ -4,21 +4,16 @@ namespace App\Http\Controllers\V1\Order;
 
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Rules\TurkishPhoneNumber;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator; 
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
+use App\Helpers\OrderHelper;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\Validate\ValidateBulkOrderItemsRequest;
 use App\Http\Requests\Validate\ValidateFormsRequest;
 use App\Http\Requests\Validate\ValidateInvoiceRequest;
 use App\Http\Requests\Validate\ValidateOrderItemRequest;
-use App\Rules\StockItemValidation;
-use App\Rules\StockValidation;
-use App\Rules\StockQuantity;
+
 
 
 class StoreController extends Controller
@@ -28,45 +23,58 @@ class StoreController extends Controller
         $validated = $request->validated();
         $offerPrice = $this->calculateOfferPrice($validated['items']);
         $orderCode = strtoupper(uniqid('SIPARIS_'));
-
+        $validated['customer_id'] = Auth::id();
+    
         try {
             DB::transaction(function () use ($validated, $offerPrice, $orderCode, &$order) {
+    
+                // Sipariş oluşturuluyor
                 $order = Order::create([
-                    'order_name' => $validated['order_name'],
-                    'note' => $validated['note'] ?? null,
-                    'offer_price' => $offerPrice,
-                    'customer_id' => Auth::id(),
-                    'order_code' => $orderCode,
+                    'order_name'   => $validated['order_name'],
+                    'note'         => $validated['note'] ?? null,
+                    'offer_price'  => $offerPrice,
+                    'customer_id'  => Auth::id(),
+                    'order_code'   => $orderCode,
                 ]);
-                
+    
+                // Sipariş kalemleri oluşturuluyor
                 collect($validated['items'])->each(function ($item) use ($order) {
                     $orderBasket = $order->orderBaskets()->create();
-                
+    
                     $orderBasket->orderItem()->create([
-                        'stock_id' => $item['stock_id'],
-                        'quantity' => $item['quantity'],
+                        'stock_id'   => $item['stock_id'],
+                        'quantity'   => $item['quantity'],
                         'unit_price' => $item['unit_price'],
                     ]);
-                
+    
                     $orderBasket->orderLogos()->createMany(
                         collect($item['image'])->map(fn($image) => ['image' => $image])->toArray()
                     );
                 });
-
-                $order->paymentReceipts()->create([
+    
+                // Ödeme dekontu kaydı
+                $order->paymentReceipt()->create([
                     'file_path' => $validated['payment_receipt_url'],
                 ]);
-
+    
+                // Fatura bilgisi varsa ekleniyor
                 if (!empty($validated['invoice'])) {
                     $order->invoiceInfo()->create($validated['invoice']);
                 }
+    
+                // Müşteri bilgileri kaydediliyor (customer_infos tablosu)
+                if (!empty($validated['customer'])) {
+                    $order->customerInfo()->create($validated['customer']);
+                }
+    
+                OrderHelper::createCustomerOrder($order);
             });
-
+    
             return response()->json([
                 'message' => 'Sipariş ve ürünler başarıyla oluşturuldu.',
-                'data' => $order->load('orderBaskets.orderItem', 'paymentReceipts'),
+                'data' => $order->load('orderBaskets.orderItem', 'paymentReceipt'),
             ], 201);
-
+    
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Sipariş oluşturulurken bir hata meydana geldi.',
