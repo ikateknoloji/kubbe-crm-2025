@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $year }}-{{ $month }} Sipariş Listesi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table, .table th, .table td {
+            border: 1px solid black;
+        }
+        .table th, .table td {
+            padding: 8px;
+            text-align: left;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ $year }} - {{ $month }} Sipariş Listesi</h2>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sipariş Adı</th>
+                <th>Sipariş Kodu</th>
+                <th>Toplam Ürün Sayısı</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($orders['orders'] as $order)
+                <tr>
+                    <td>{{ $order['id'] }}</td>
+                    <td>{{ $order['order_name'] }}</td>
+                    <td>{{ $order['order_code'] }}</td>
+                    <td>{{ $order['total_items_count'] }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Toplam Sipariş: {{ $orders['total_orders'] }}</p>
+        <p>Toplam Ürün Miktarı: {{ $orders['total_quantity'] }}</p>
+    </div>
+</body>
+</html>
