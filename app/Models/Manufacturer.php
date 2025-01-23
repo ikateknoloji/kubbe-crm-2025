@@ -29,4 +29,12 @@ class Manufacturer extends Model
     {
         return $this->hasMany(Order::class, 'manufacturer_id');
     }
+
+    /**
+     * Üreticinin ManufacturerOrder ile ilişkisi
+     */
+    public function manufacturerOrders()
+    {
+        return $this->hasMany(ManufacturerOrder::class, 'manufacturer_id');
+    }
 }

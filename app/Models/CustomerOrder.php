@@ -24,4 +24,12 @@ class CustomerOrder extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    /**
+     * İlişki: Bir müşteri siparişi bir müşteriye (User) aittir.
+     */
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 }

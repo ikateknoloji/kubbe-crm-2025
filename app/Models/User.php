@@ -77,5 +77,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
+
+    /**
+     * Kullanıcının CustomerOrder tablosundaki müşteri siparişleri.
+     */
+    public function customerOrderRecords()
+    {
+        return $this->hasMany(CustomerOrder::class, 'customer_id');
+    }
     
 }

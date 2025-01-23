@@ -23,4 +23,11 @@ class ManufacturerOrder extends Model
         return $this->belongsTo(Order::class);
     }
     
+    /**
+     * İlişki: Bir üretici siparişi bir üreticiye aittir.
+     */
+    public function manufacturer()
+    {
+        return $this->belongsTo(Manufacturer::class);
+    }
 }
