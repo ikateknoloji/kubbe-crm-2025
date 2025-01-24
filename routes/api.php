@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\V1\Bill\InvoicedOrderController;
+use App\Http\Controllers\V1\History\ManufacturerOrderController;
 use App\Http\Controllers\V1\Order\DesingerGetController;
 use App\Http\Controllers\V1\Shipping\GetShippingController;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use App\Http\Controllers\V1\Order\StoreController;
 use App\Http\Controllers\V1\Order\GetOrderController;
 use App\Http\Controllers\V1\Bill\BillController;
 use App\Http\Controllers\V1\Bill\UninvoicedOrderController;
+use App\Http\Controllers\V1\History\OrderController;
 use App\Http\Controllers\V1\Image\RevertImageController;
 use App\Http\Controllers\V1\Image\ImageController;
 use App\Http\Controllers\V1\Manage\OrderManageController;
@@ -135,4 +137,11 @@ Route::prefix('v1/images')->group(function () {
     Route::post('/revert-order-logo', [RevertImageController::class, 'revertOrderLogo']);
     Route::post('/revert-payment-receipt', [RevertImageController::class, 'revertPaymentReceipt']);
     Route::post('/revert-shipping-image', [RevertImageController::class, 'revertShippingImage']);
+});
+
+Route::middleware('auth:sanctum')->prefix('v1/history')->group(function () {
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/customer/{customerId}', [OrderController::class, 'getOrdersByCustomerId']);
+    Route::get('/orders/manufacturer/{manufacturerId}', [ManufacturerOrderController::class, 'getOrdersByManufacturerId']);
+ 
 });
