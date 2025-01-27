@@ -8,9 +8,28 @@ use Illuminate\Http\Request;
 
 use App\Models\RoleUser;
 use Illuminate\Support\Facades\DB;
+use App\Models\Role;
+use Illuminate\Http\JsonResponse;
 
 class RoleController extends Controller
 {
+
+    /**
+     * Tüm rolleri getirir.
+     * 
+
+     * @return JsonResponse
+     */
+    public function getRoles(): JsonResponse
+    {
+        $roles = Role::all(); // Role modelinden tüm rolleri alıyoruz
+
+        return response()->json([
+            'message' => 'Roller başarıyla getirildi.',
+            'data' => $roles,
+        ], 200);
+    }
+    
     /**
      * Kullanıcı rollerini toplu olarak günceller.
      *

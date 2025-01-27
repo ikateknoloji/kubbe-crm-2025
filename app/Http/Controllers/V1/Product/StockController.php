@@ -7,6 +7,7 @@ use App\Http\Requests\StockIndexRequest;
 use App\Http\Requests\Stok\StoreStockRequest;
 use App\Http\Resources\Stock\StockResource;
 use App\Models\Color;
+use App\Models\ProductType;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -16,28 +17,37 @@ use Illuminate\Support\Facades\DB;
 class StockController extends Controller
 {
 
-    /**
-     * Adet bilgisiyle tüm ürünleri listele (0 olmayanlar).
-     * Filtreleme: product_type ve color_name
-     * HTTP Method: OPTIONS
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function index(StockIndexRequest $request)
+    public function index(Request $request)
     {
-        $validated = $request->validated();
 
-        $productType = $validated['product_type'] ?? null;
-        $colorName = $validated['color_name'] ?? null;
+    
+        $productTypeId = $request->get('product_type_id') ?? null; 
+        $colorId = $request->get('color_id')  ?? null; 
 
         $stocks = Stock::with(['productType.productCategory', 'color'])
-            ->where('quantity', '>', 0)
-            ->filter($productType, $colorName)
-            ->paginate(10);
+        ->where('quantity', '>', 0)
+        ->when($productTypeId, function ($query, $productTypeId) {
+            $query->where('product_type_id', '=', $productTypeId); 
+        })
+        ->when($colorId, function ($query, $colorId) {
+            $query->where('color_id', '=', $colorId); 
+        })
+        ->get();
+    
+    
+        // Tüm ürün tiplerini ve renk bilgilerini al
+        $productTypes = ProductType::all();
+        $colors = Color::all();
 
-        return StockResource::collection($stocks)->response()->getData(true);
+
+        return response()->json([
+            'stocks' => StockResource::collection($stocks)->response()->getData(true),
+            'product_types' => $productTypes,
+            'colors' => $colors
+        ], 200);
     }
+    
+    
 
     /**
      * Stoğa yeni ürün ekleme veya mevcut stoğu artırma.

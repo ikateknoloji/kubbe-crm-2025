@@ -26,6 +26,7 @@ use App\Http\Controllers\V1\Order\CustomerGetController;
 use App\Http\Controllers\V1\Product\ColorController;
 use App\Http\Controllers\V1\Shipping\StoreShippingController;
 use App\Http\Controllers\V1\Product\ProductTypeController;
+use App\Http\Controllers\V1\User\CustomerController;
 
 /**
  * API Routes
@@ -47,6 +48,7 @@ Route::prefix('v1/auth')->group(function () {
    });
 
    Route::prefix('roles')->middleware('auth:sanctum')->group(function () {
+       Route::get('/', [RoleController::class, 'getRoles'])->name('roles.getRoles'); 
        Route::post('/update-user-roles', [RoleController::class, 'updateUserRoles'])->name('roles.updateUserRoles');
    });
 });
@@ -145,3 +147,5 @@ Route::middleware('auth:sanctum')->prefix('v1/history')->group(function () {
     Route::get('/orders/manufacturer/{manufacturerId}', [ManufacturerOrderController::class, 'getOrdersByManufacturerId']);
  
 });
+
+Route::get('/v1/customers', [CustomerController::class, 'index']);

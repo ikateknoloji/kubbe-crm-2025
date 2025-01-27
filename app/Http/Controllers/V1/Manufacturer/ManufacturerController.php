@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Manufacturer;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ManufacturerController extends Controller
 {
@@ -26,10 +27,26 @@ class ManufacturerController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:manufacturers,name|max:255',
-            'image' => 'nullable|image|max:2048', 
+            'image' => 'required|image|max:2048',
+        ], [
+            'name.required' => 'Üretici adı alanı zorunludur.',
+            'name.string' => 'Üretici adı yalnızca metin olmalıdır.',
+            'name.unique' => 'Bu üretici adı zaten kayıtlı.',
+            'name.max' => 'Üretici adı en fazla :max karakter olabilir.',
+            'image.required' => 'Resim dosyası zorunludur.',
+            'image.image' => 'Yüklenen dosya bir resim olmalıdır.',
+            'image.max' => 'Resim dosyası boyutu en fazla :max KB olabilir.',
         ]);
+    
+        // Doğrulama hatası varsa
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
     
         $data = $request->only(['name']);
         if ($request->hasFile('image')) {
