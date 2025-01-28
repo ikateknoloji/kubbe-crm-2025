@@ -44,12 +44,12 @@ class StoreOrderRequest extends FormRequest
             'invoice.address'      => 'required_with:invoice|max:500',
             'invoice.tax_office'   => 'required_if:invoice.invoice_type,I|max:255',
             'invoice.tax_number'   => 'required_if:invoice.invoice_type,I|max:50',
-            'invoice.email'        => 'nullable|email|max:255',
+            'invoice.email'        => 'nullable|max:255',
 
             // Müşteri bilgileri
             'customer' => 'required|array',
             'customer.name'  => 'required|string|max:255',
-            'customer.email' => 'nullable|email|max:255',
+            'customer.email' => 'nullable|max:255',
             'customer.phone' => 'required|string|max:255',
         ];
     }

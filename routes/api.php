@@ -109,12 +109,12 @@ Route::prefix('v1/orders/manage')->group(function () {
     Route::post('/assign-manufacturer', [OrderManageController::class, 'assignManufacturer']);
 });
 
-Route::prefix('v1/bill')->group(function () {
-    Route::get('/uninvoiced-orders', [UninvoicedOrderController::class, 'getUninvoicedOrders'])->middleware('auth:sanctum');
-    Route::get('/uninvoiced-orders/{id}', [UninvoicedOrderController::class, 'getSingleUninvoicedOrder'])->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->prefix('v1/bill')->group(function () {
+    Route::get('/uninvoiced-orders', [UninvoicedOrderController::class, 'getUninvoicedOrders']);
+    Route::get('/uninvoiced-orders/{id}', [UninvoicedOrderController::class, 'getSingleUninvoicedOrder']);
     Route::post('/store/{orderId}', [BillController::class, 'store']);
     Route::put('/update/{orderId}', [BillController::class, 'update']);
-    Route::get('/invoiced-orders', [InvoicedOrderController::class, 'getInvoicedOrders'])->middleware('auth:sanctum');
+    Route::get('/invoiced-orders', [InvoicedOrderController::class, 'getInvoicedOrders']);
     Route::get('/invoiced-orders/{id}', [InvoicedOrderController::class, 'getSingleInvoicedOrder']);
 });
 

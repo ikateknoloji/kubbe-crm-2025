@@ -23,12 +23,10 @@ class DatabaseSeeder extends Seeder
             ProductTypeSeeder::class,
             ColorSeeder::class,
             StockSeeder::class,
-            
-             // OrderSeeder::class,
-        ]);
+                    ]);
          
      
-        // Stock::query()->update(['quantity' => DB::raw('quantity + 100')]);
+         Stock::query()->update(['quantity' => DB::raw('quantity + 100')]);
 
     }
 }

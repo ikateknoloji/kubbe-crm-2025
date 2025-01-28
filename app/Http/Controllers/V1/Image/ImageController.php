@@ -56,7 +56,7 @@ class ImageController extends Controller
         
         return response()->json([
             'message' => 'Resim başarıyla yüklendi.',
-            'order_image_url' => asset('storage/' . $path),
+            'order_image_url' =>  $path,
         ], 200);
     }
 }

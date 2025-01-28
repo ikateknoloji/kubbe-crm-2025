@@ -35,6 +35,7 @@ class StoreShippingController extends Controller
     {
         DB::beginTransaction();
         try {
+            
             $order = Order::findOrFail($orderId);
 
             if ($order->status !== OrderStatus::P) {

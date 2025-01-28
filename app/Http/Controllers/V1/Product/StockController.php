@@ -25,7 +25,7 @@ class StockController extends Controller
         $colorId = $request->get('color_id')  ?? null; 
 
         $stocks = Stock::with(['productType.productCategory', 'color'])
-        ->where('quantity', '>', 0)
+        // ->where('quantity', '>', 0)
         ->when($productTypeId, function ($query, $productTypeId) {
             $query->where('product_type_id', '=', $productTypeId); 
         })
