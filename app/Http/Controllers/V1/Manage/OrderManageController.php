@@ -47,7 +47,7 @@ class OrderManageController extends Controller
     {
         $orderId = $request->input('order_id');
         $order = Order::findOrFail($orderId);
-        $order->update(['status' => 'RFP']);
+        $order->update(['status' => 'PD']);
 
         return response()->json([
             'message' => "Sipariş '{$order->order_name}' başarıyla 'RFP' aşamasına alındı."

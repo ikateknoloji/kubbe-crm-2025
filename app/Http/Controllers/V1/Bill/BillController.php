@@ -62,4 +62,29 @@ class BillController extends Controller
             'invoice_info' => $invoiceInfo
         ], 200);
     }
+
+   /**
+     * Belirli bir siparişin fatura durumunu 'C' olarak günceller.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateInvoiceStatusToC($id)
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Sipariş bulunamadı.'
+            ], 404);
+        }
+
+        $order->invoice_status = 'C';
+        $order->save();
+
+        return response()->json([
+            'message' => 'Fatura durumu başarıyla güncellendi.',
+            'order' => $order
+        ]);
+    }
 }

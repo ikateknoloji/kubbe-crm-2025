@@ -116,6 +116,8 @@ Route::middleware('auth:sanctum')->prefix('v1/bill')->group(function () {
     Route::put('/update/{orderId}', [BillController::class, 'update']);
     Route::get('/invoiced-orders', [InvoicedOrderController::class, 'getInvoicedOrders']);
     Route::get('/invoiced-orders/{id}', [InvoicedOrderController::class, 'getSingleInvoicedOrder']);
+    Route::put('/update-invoice-status/{id}', [BillController::class, 'updateInvoiceStatusToC']);
+
 });
 
 Route::prefix('v1/shipping')->group(function () {
