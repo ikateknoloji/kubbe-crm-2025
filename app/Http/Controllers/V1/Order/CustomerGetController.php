@@ -58,9 +58,10 @@ class CustomerGetController extends Controller
             'paymentReceipt',
             'shippingAddress',
             'orderImages',
-            'customerInfo'
+            'customerInfo',
+            'timeline',
         ])
-        ->where('customer_id', $user->id) // Kullanıcıya ait sipariş
+        ->where('customer_id', $user->id) 
         ->findOrFail($id);
 
         return response()->json(new SingleOrderResource($order));

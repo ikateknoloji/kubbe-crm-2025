@@ -43,6 +43,11 @@ class OrderManageController extends Controller
                 'paid_amount' => $request->input('paid_amount'),
             ]);
 
+            $order->timeline()->updateOrCreate(
+                ['order_id' => $order->id], 
+                ['approved_at' => now()]
+            );
+
             DB::commit();
 
             return response()->json([

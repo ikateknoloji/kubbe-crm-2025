@@ -46,7 +46,8 @@ class DeliveryGetController extends Controller
             'paymentReceipt',
             'shippingAddress',
             'orderImages',
-            'customerInfo'
+            'customerInfo',
+            'orderItems',
         ])->findOrFail($id);
 
         return response()->json(new SingleOrderResource($order));

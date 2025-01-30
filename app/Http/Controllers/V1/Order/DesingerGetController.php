@@ -51,7 +51,8 @@ class DesingerGetController extends Controller
             'paymentReceipt',
             'shippingAddress',
             'orderImages',
-            'customerInfo'
+            'customerInfo',
+            'timeline'
         ])->findOrFail($id);
 
         return response()->json(new SingleOrderResource($order));

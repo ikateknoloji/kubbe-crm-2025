@@ -46,7 +46,8 @@ class GetOrderController extends Controller
             'paymentReceipt',
             'shippingAddress',    
             'orderImages',  
-            'customerInfo'      
+            'customerInfo',
+            'timeline'     
         ])->findOrFail($id);
         
 
