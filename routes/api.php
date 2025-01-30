@@ -84,6 +84,7 @@ Route::prefix('v1/orders')->group(function () {
     Route::post('/validate-order-item', [StoreController::class, 'validateOrderItem']);
     Route::post('/validate-bulk-order-items', [StoreController::class, 'validateBulkOrderItems']);
     Route::post('/validate-invoice', [StoreController::class, 'validateInvoice']);
+    Route::post('/validate-shipping-address', [StoreController::class, 'validateShippingAddress']);
 
     Route::controller(GetOrderController::class)->group(function () {
         Route::get('/get-orders', 'index');
@@ -101,7 +102,6 @@ Route::prefix('v1/customer-orders')->middleware('auth:sanctum')->group(function 
     Route::get('/', [CustomerGetController::class, 'index']);
     Route::get('/{id}', [CustomerGetController::class, 'show']);
 });
-
 
 Route::prefix('v1/orders/manage')->group(function () {
     Route::post('/approve', [OrderManageController::class, 'approveOrder']);

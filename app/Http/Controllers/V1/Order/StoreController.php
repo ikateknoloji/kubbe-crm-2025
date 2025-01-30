@@ -13,6 +13,7 @@ use App\Http\Requests\Validate\ValidateBulkOrderItemsRequest;
 use App\Http\Requests\Validate\ValidateFormsRequest;
 use App\Http\Requests\Validate\ValidateInvoiceRequest;
 use App\Http\Requests\Validate\ValidateOrderItemRequest;
+use App\Http\Requests\Validate\ValidateShippingAddressRequest;
 
 
 
@@ -28,7 +29,6 @@ class StoreController extends Controller
         try {
             DB::transaction(function () use ($validated, $offerPrice, $orderCode, &$order) {
     
-                // Sipariş oluşturuluyor
                 $order = Order::create([
                     'order_name'   => $validated['order_name'],
                     'note'         => $validated['note'] ?? null,
@@ -37,7 +37,6 @@ class StoreController extends Controller
                     'order_code'   => $orderCode,
                 ]);
     
-                // Sipariş kalemleri oluşturuluyor
                 collect($validated['items'])->each(function ($item) use ($order) {
                     $orderBasket = $order->orderBaskets()->create();
     
@@ -52,21 +51,13 @@ class StoreController extends Controller
                     );
                 });
     
-                // Ödeme dekontu kaydı
-                $order->paymentReceipt()->create([
-                    'file_path' => $validated['payment_receipt_url'],
-                ]);
-    
-                // Fatura bilgisi varsa ekleniyor
-                if (!empty($validated['invoice'])) {
-                    $order->invoiceInfo()->create($validated['invoice']);
+                $order->paymentReceipt()->create(['file_path' => $validated['payment_receipt_url'],]);
+                $order->invoiceInfo()->create($validated['invoice']);
+                $order->customerInfo()->create($validated['customer']);
+                if (!empty($validated['shipping_address'])) {
+                    $order->shippingAddress()->create($validated['shipping_address']);
                 }
-    
-                // Müşteri bilgileri kaydediliyor (customer_infos tablosu)
-                if (!empty($validated['customer'])) {
-                    $order->customerInfo()->create($validated['customer']);
-                }
-    
+                
                 OrderHelper::createCustomerOrder($order);
             });
     
@@ -175,6 +166,14 @@ class StoreController extends Controller
     {
         return response()->json([
             'message' => 'Fatura bilgileri başarıyla doğrulandı!',
+        ], 200);
+    }
+
+    public function validateShippingAddress(ValidateShippingAddressRequest $request)
+    {
+        return response()->json([
+            'message' => 'Adres bilgileri başarıyla doğrulandı.',
+            'data' => $request->validated(),
         ], 200);
     }
     
