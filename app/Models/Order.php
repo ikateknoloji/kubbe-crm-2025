@@ -97,4 +97,20 @@ class Order extends Model
     {
         return $this->hasManyThrough(OrderItem::class, OrderBasket::class, 'order_id', 'order_basket_id', 'id', 'id');
     }
+
+    public function timeline()
+    {
+        return $this->hasOne(OrderTimeline::class);
+    }
+    
+    public function invoiceFile()
+    {
+        return $this->hasOne(OrderInvoiceFile::class);
+    }
+
+    public function shipping()
+    {
+        return $this->hasOne(OrderShipping::class);
+    }
+
 }
