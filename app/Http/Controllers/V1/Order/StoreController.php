@@ -35,6 +35,7 @@ class StoreController extends Controller
                     'offer_price'  => $offerPrice,
                     'customer_id'  => Auth::id(),
                     'order_code'   => $orderCode,
+                    'shipping_type' => $validated['shipping_type'] ?? null,
                 ]);
     
                 collect($validated['items'])->each(function ($item) use ($order) {

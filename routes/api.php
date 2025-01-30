@@ -23,6 +23,7 @@ use App\Http\Controllers\V1\Image\RevertImageController;
 use App\Http\Controllers\V1\Image\ImageController;
 use App\Http\Controllers\V1\Manage\OrderManageController;
 use App\Http\Controllers\V1\Order\CustomerGetController;
+use App\Http\Controllers\V1\Order\DeliveryGetController;
 use App\Http\Controllers\V1\Product\ColorController;
 use App\Http\Controllers\V1\Shipping\StoreShippingController;
 use App\Http\Controllers\V1\Product\ProductTypeController;
@@ -107,8 +108,9 @@ Route::prefix('v1/orders/manage')->group(function () {
     Route::post('/approve', [OrderManageController::class, 'approveOrder']);
     Route::post('/prepare-for-shipping', [OrderManageController::class, 'prepareForShipping']);
     Route::post('/assign-manufacturer', [OrderManageController::class, 'assignManufacturer']);
-    Route::post('/{orderId}/shipping', [OrderManageController::class, 'storeOrderShippingWithDate']);
+    Route::post('/{orderId}/shipping', [OrderManageController::class, 'storeOrderShipping']);
     Route::post('/{orderId}/images', [OrderManageController::class, 'storeOrderImages']);
+
 });
 
 Route::middleware('auth:sanctum')->prefix('v1/bill')->group(function () {
@@ -120,6 +122,13 @@ Route::middleware('auth:sanctum')->prefix('v1/bill')->group(function () {
     Route::get('/invoiced-orders/{id}', [InvoicedOrderController::class, 'getSingleInvoicedOrder']);
     Route::put('/update-invoice-status/{id}', [BillController::class, 'updateInvoiceStatusToC']);
 
+});
+
+Route::prefix('v1/delivery')->group(function () {
+    Route::get('/orders', [DeliveryGetController::class, 'index'])->name('delivery.orders');
+    Route::get('/orders/{id}', [DeliveryGetController::class, 'show'])->name('delivery.order.show');
+    Route::get('/take-away-orders', [DeliveryGetController::class, 'getTakeAwayOrders']);
+    Route::get('/shipped-orders-by-shipping', [DeliveryGetController::class, 'getShippedOrdersByShippingType']);
 });
 
 Route::prefix('v1/shipping')->group(function () {

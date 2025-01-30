@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Shipping;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreOrderShippingRequest extends FormRequest
 {
@@ -33,5 +35,21 @@ class StoreOrderShippingRequest extends FormRequest
             'shipping_company.string' => 'Kargo şirketi adı bir metin olmalıdır.',
             'shipping_company.max' => 'Kargo şirketi adı en fazla 100 karakter olabilir.',
         ];
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     *
+     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Doğrulama Hataları.',
+            'errors' => $validator->errors(),
+        ], 422));
     }
 }

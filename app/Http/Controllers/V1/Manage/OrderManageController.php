@@ -109,8 +109,8 @@ class OrderManageController extends Controller
     /**
      * Sipariş için resim yükler ve kaydeder.
      *
-     * @param    $request
-     * @param  int  $orderId
+     * @param    StoreOrderImagesRequest $request
+     * @param    int $orderId
      * @return \Illuminate\Http\JsonResponse
      */
     public function storeOrderImages(StoreOrderImagesRequest $request, $orderId): JsonResponse
@@ -118,25 +118,28 @@ class OrderManageController extends Controller
         DB::beginTransaction();
         try {
             $order = Order::findOrFail($orderId);
-        
+
             $validated = $request->validated();
             $uploadedImages = [];
 
-            foreach ($validated['images'] as $image) {
-                $filePath = FileUploadHelper::uploadFile($image, 'order_images');
-            
+            foreach ($validated['images'] as $imageUrl) {
+                // Direkt olarak URL'yi image_path olarak kaydet
                 $uploadedImages[] = [
                     'order_id'   => $order->id,
-                    'image_path' => $filePath,
+                    'image_path' => $imageUrl, // URL'yi direkt kaydet
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
-        
+
+            // Sipariş durumunu güncelle
             $order->update(['status' => OrderStatus::SHP]);
             $order->timeline()->update(['production_completed_at' => now()]);
 
+            // Resimleri veritabanına ekle
             OrderImage::insert($uploadedImages);
+
+            // İlgili siparişle üretici siparişini oluştur
             OrderHelper::createManufacturerOrder($order);
 
             DB::commit();
@@ -144,6 +147,7 @@ class OrderManageController extends Controller
                 'message' => 'Sipariş resimleri başarıyla yüklendi.',
                 'uploaded_images' => $uploadedImages
             ], 201);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Bir hata oluştu.', 'error' => $e->getMessage()], 500);
@@ -172,11 +176,14 @@ class OrderManageController extends Controller
                 ]
             );
 
+            $order->update(['status' => 'PD']);
+
             DB::commit();
             return response()->json([
                 'message' => "Sipariş '{$order->order_name}' için kargo bilgileri kaydedildi.",
                 'data' => $order->shipping
             ], 201);
+
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Kargo bilgileri kaydedilirken bir hata oluştu.', 'error' =>  $e->getMessage()], 500);

@@ -41,7 +41,7 @@ class OrderSeeder extends Seeder
 
             $items = collect(range(1, rand(1, 3)))->map(function () use ($faker) {
                 $quantity  = $faker->numberBetween(1, 5);
-                $unitPrice = $faker->randomFloat(2, 700, 750);
+                $unitPrice = $faker->randomFloat(2, 900, max: 1000);
                 $stockId   = rand(1, 10);
                 
                 $files = Storage::disk('public')->files('order_images');
@@ -135,6 +135,15 @@ class OrderSeeder extends Seeder
                 ];
                 $order->invoiceInfo()->create($invoiceData);
             }
+
+            $order->shippingAddress()->create([
+                'full_name' => $faker->name,
+                'address' => $faker->address,
+                'city' => $faker->city,
+                'district' => $faker->citySuffix,
+                'country' => 'Türkiye',
+                'phone' => $faker->phoneNumber,
+            ]);
         });
     }
 }

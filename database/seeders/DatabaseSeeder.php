@@ -18,15 +18,16 @@ class DatabaseSeeder extends Seeder
     {
     
         $this->call([
-            RolesTableSeeder::class,
-            ProductCategorySeeder::class,
-            ProductTypeSeeder::class,
-            ColorSeeder::class,
-            StockSeeder::class,
+            //RolesTableSeeder::class,
+           // ProductCategorySeeder::class,
+            //ProductTypeSeeder::class,
+           // ColorSeeder::class,
+           // StockSeeder::class,
+           OrderSeeder::class
                     ]);
          
      
-         Stock::query()->update(['quantity' => DB::raw('quantity + 100')]);
+        // Stock::query()->update(['quantity' => DB::raw('quantity + 100')]);
 
     }
 }
