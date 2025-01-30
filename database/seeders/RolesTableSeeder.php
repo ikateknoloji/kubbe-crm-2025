@@ -17,6 +17,7 @@ class RolesTableSeeder extends Seeder
             ['name' => 'admin', 'description' => 'Sistemi yöneten kişi'],
             ['name' => 'musteri', 'description' => 'Ürün veya hizmet alan kişi'],
             ['name' => 'tasarimci', 'description' => 'Tasarım işleri ile ilgilenen kişi'],
+            ['name' => 'kargo', 'description' => 'Kargo işleri ile ilgilenen kişi'],
         ]);
 
         $roles->each(fn($role) => Role::updateOrCreate(

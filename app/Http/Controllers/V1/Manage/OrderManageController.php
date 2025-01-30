@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Manage;
 use App\Enums\OrderStatus;
 
 use App\Helpers\FileUploadHelper;
+use App\Helpers\StockHelper;
 use App\Helpers\OrderHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -22,25 +23,40 @@ use App\Http\Requests\Shipping\StoreOrderShippingRequest;
 class OrderManageController extends Controller
 {
     /**
-     * Siparişi onaylayarak PRP aşamasına gönderir.
+     * Siparişi onaylayarak PRP aşamasına gönderir ve stoktan düşer.
      *
      * @param \App\Http\Requests\Manage\ApproveOrderRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function approveOrder(ApproveOrderRequest $request): JsonResponse
     {
-        $orderId = $request->input('order_id');
-        $paidAmount = $request->input('paid_amount');
+        DB::beginTransaction();
+        try {
+            $order = Order::where('id', $request->input('order_id'))
+                          ->with(['orderItems.stock'])
+                          ->firstOrFail();
 
-        $order = Order::findOrFail($orderId);
-        $order->update([
-            'status'       => 'PRP',
-            'paid_amount'  => $paidAmount
-        ]);
+            StockHelper::reduceStockForOrder($order); 
 
-        return response()->json([
-            'message' => "Sipariş '{$order->order_name}' başarıyla onaylandı, ödeme miktarı: ₺{$paidAmount}"
-        ], 200);
+            $order->update([
+                'status' => 'PRP',
+                'paid_amount' => $request->input('paid_amount'),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => "Sipariş '{$order->order_name}' başarıyla onaylandı ve stok güncellendi.",
+                'data' => $order->load('orderItems.stock')
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Sipariş onaylanırken hata oluştu.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
