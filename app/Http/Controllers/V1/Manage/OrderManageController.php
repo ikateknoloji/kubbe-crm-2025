@@ -17,6 +17,7 @@ use App\Models\Manufacturer;
 use App\Models\OrderImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Shipping\StoreOrderShippingRequest;
 
 class OrderManageController extends Controller
 {
@@ -130,6 +131,39 @@ class OrderManageController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Bir hata oluştu.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Sipariş için kargo bilgilerini kaydeder veya günceller.
+     *
+     * @param  \App\Http\Requests\Shipping\StoreOrderShippingRequest  $request
+     * @param  int  $orderId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeOrderShipping(StoreOrderShippingRequest $request, $orderId): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::findOrFail($orderId);
+            $validated = $request->validated();
+
+            $order->shipping()->updateOrCreate(
+                ['order_id' => $order->id],
+                [
+                    'tracking_code' => $validated['tracking_code'],
+                    'shipping_company' => $validated['shipping_company'],
+                ]
+            );
+
+            DB::commit();
+            return response()->json([
+                'message' => "Sipariş '{$order->order_name}' için kargo bilgileri kaydedildi.",
+                'data' => $order->shipping
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Kargo bilgileri kaydedilirken bir hata oluştu.', 'error' =>  $e->getMessage()], 500);
         }
     }
 }

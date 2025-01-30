@@ -107,6 +107,8 @@ Route::prefix('v1/orders/manage')->group(function () {
     Route::post('/approve', [OrderManageController::class, 'approveOrder']);
     Route::post('/prepare-for-shipping', [OrderManageController::class, 'prepareForShipping']);
     Route::post('/assign-manufacturer', [OrderManageController::class, 'assignManufacturer']);
+    Route::post('/{orderId}/shipping', [OrderManageController::class, 'storeOrderShippingWithDate']);
+    Route::post('/{orderId}/images', [OrderManageController::class, 'storeOrderImages']);
 });
 
 Route::middleware('auth:sanctum')->prefix('v1/bill')->group(function () {
