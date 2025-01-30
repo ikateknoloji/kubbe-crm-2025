@@ -4,14 +4,19 @@ namespace App\Http\Controllers\V1\Manage;
 
 use App\Enums\OrderStatus;
 
+use App\Helpers\FileUploadHelper;
+use App\Helpers\OrderHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\Manage\ApproveOrderRequest;
 use App\Http\Requests\Manage\PrepareForShippingRequest;
 use App\Http\Requests\Manage\AssignManufacturerRequest;
+use App\Http\Requests\StoreOrderImagesRequest;
 use App\Models\Order;
 use App\Models\Manufacturer;
+use App\Models\OrderImage;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class OrderManageController extends Controller
 {
@@ -49,6 +54,11 @@ class OrderManageController extends Controller
         $order = Order::findOrFail($orderId);
         $order->update(['status' => 'RFP']);
 
+        $order->timeline()->updateOrCreate(
+            ['order_id' => $order->id],
+            ['production_started_at' => now()]
+        );
+        
         return response()->json([
             'message' => "Sipariş '{$order->order_name}' başarıyla 'RFP' aşamasına alındı."
         ], 200);
@@ -77,5 +87,49 @@ class OrderManageController extends Controller
         return response()->json([
             'message' => "Sipariş '{$order->order_name}' başarıyla '{$manufacturer->name}' üreticisine atandı ve 'P' aşamasına getirildi."
         ], 200);
+    }
+
+    /**
+     * Sipariş için resim yükler ve kaydeder.
+     *
+     * @param    $request
+     * @param  int  $orderId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeOrderImages(StoreOrderImagesRequest $request, $orderId): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::findOrFail($orderId);
+        
+            $validated = $request->validated();
+            $uploadedImages = [];
+
+            foreach ($validated['images'] as $image) {
+                $filePath = FileUploadHelper::uploadFile($image, 'order_images');
+            
+                $uploadedImages[] = [
+                    'order_id'   => $order->id,
+                    'image_path' => $filePath,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        
+            $order->update(['status' => OrderStatus::SHP]);
+            $order->timeline()->update(['production_completed_at' => now()]);
+
+            OrderImage::insert($uploadedImages);
+            OrderHelper::createManufacturerOrder($order);
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Sipariş resimleri başarıyla yüklendi.',
+                'uploaded_images' => $uploadedImages
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Bir hata oluştu.', 'error' => $e->getMessage()], 500);
+        }
     }
 }

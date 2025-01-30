@@ -57,7 +57,12 @@ class StoreController extends Controller
                 if (!empty($validated['shipping_address'])) {
                     $order->shippingAddress()->create($validated['shipping_address']);
                 }
-                
+
+                $order->timeline()->create([
+                    'approved_at' => now(),
+                ]);
+
+
                 OrderHelper::createCustomerOrder($order);
             });
     
