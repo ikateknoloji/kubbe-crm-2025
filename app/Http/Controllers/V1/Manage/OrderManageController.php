@@ -76,11 +76,7 @@ class OrderManageController extends Controller
         $order = Order::findOrFail($orderId);
         $order->update(['status' => 'RFP']);
 
-        $order->timeline()->updateOrCreate(
-            ['order_id' => $order->id],
-            ['production_started_at' => now()]
-        );
-        
+
         return response()->json([
             'message' => "Sipariş '{$order->order_name}' başarıyla 'RFP' aşamasına alındı."
         ], 200);
@@ -103,6 +99,9 @@ class OrderManageController extends Controller
             'manufacturer_id' => $manufacturerId,
             'status'          => OrderStatus::P
         ]);
+
+        $order->timeline()->update(['production_started_at' => now()]);
+        
 
         $manufacturer = Manufacturer::findOrFail($manufacturerId);
 
@@ -128,24 +127,20 @@ class OrderManageController extends Controller
             $uploadedImages = [];
 
             foreach ($validated['images'] as $imageUrl) {
-                // Direkt olarak URL'yi image_path olarak kaydet
                 $uploadedImages[] = [
                     'order_id'   => $order->id,
-                    'image_path' => $imageUrl, // URL'yi direkt kaydet
+                    'image_path' => $imageUrl,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
 
-            // Sipariş durumunu güncelle
             $order->update(['status' => OrderStatus::SHP]);
             $order->timeline()->update(['production_completed_at' => now()]);
 
-            // Resimleri veritabanına ekle
             OrderImage::insert($uploadedImages);
-
-            // İlgili siparişle üretici siparişini oluştur
             OrderHelper::createManufacturerOrder($order);
+            OrderHelper::createCustomerOrder($order);
 
             DB::commit();
             return response()->json([
@@ -182,6 +177,8 @@ class OrderManageController extends Controller
             );
 
             $order->update(['status' => 'PD']);
+            $order->timeline()->update(['shipped_at' => now()]);
+
 
             DB::commit();
             return response()->json([

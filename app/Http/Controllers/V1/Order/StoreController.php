@@ -63,8 +63,6 @@ class StoreController extends Controller
                     'approved_at' => now(),
                 ]);
 
-
-                OrderHelper::createCustomerOrder($order);
             });
     
             return response()->json([

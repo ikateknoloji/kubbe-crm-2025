@@ -19,13 +19,11 @@ class DesingerGetController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $status = $request->get('status'); // Optional filtering by other statuses
+        $status = $request->get('status');
 
-        // Temel sorgu, 'OC' durumundaki siparişleri hariç tutar
         $query = Order::with(['customer', 'manufacturer', 'orderLogos'])
-            ->where('status', '!=', 'OC');
+            ->whereNotIn('status',  ['OC','SHP','PD']);
 
-        // Eğer başka bir durum belirtildiyse bunu uygula
         if ($status) {
             $query->where('status', $status);
         }

@@ -49,6 +49,9 @@ class SingleOrderResource extends JsonResource
             'order_timeline' => $this->whenLoaded('timeline', function () {
                 return new OrderTimelineResource($this->timeline);
             }),
+            'order_shipping' => $this->whenLoaded('shipping', function () {
+                return new OrderShippingResource($this->shipping);
+            }),
         ];
     }
 }

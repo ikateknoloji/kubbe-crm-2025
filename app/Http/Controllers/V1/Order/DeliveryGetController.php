@@ -47,7 +47,8 @@ class DeliveryGetController extends Controller
             'shippingAddress',
             'orderImages',
             'customerInfo',
-            'orderItems',
+            'orderItems',     
+            'shipping'
         ])->findOrFail($id);
 
         return response()->json(new SingleOrderResource($order));

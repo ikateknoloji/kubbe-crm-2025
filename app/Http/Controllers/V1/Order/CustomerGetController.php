@@ -60,6 +60,7 @@ class CustomerGetController extends Controller
             'orderImages',
             'customerInfo',
             'timeline',
+            'shipping'
         ])
         ->where('customer_id', $user->id) 
         ->findOrFail($id);

@@ -47,7 +47,8 @@ class GetOrderController extends Controller
             'shippingAddress',    
             'orderImages',  
             'customerInfo',
-            'timeline'     
+            'timeline',     
+            'shipping'
         ])->findOrFail($id);
         
 
