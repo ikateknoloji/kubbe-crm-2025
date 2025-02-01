@@ -30,6 +30,8 @@ use App\Http\Controllers\V1\Shipping\StoreShippingController;
 use App\Http\Controllers\V1\Product\ProductTypeController;
 use App\Http\Controllers\V1\User\CustomerController;
 use App\Http\Controllers\V1\Manage\OrderItemController;
+use App\Http\Controllers\V1\Order\EditOrderController;
+
 /**
  * API Routes
  * @apiGroup Auth
@@ -177,4 +179,8 @@ Route::prefix('v1/manage/order-items')->group(function () {
     Route::put('/logos/{orderLogoId}', [OrderItemController::class, 'updateLogo']);
     Route::post('/logos', [OrderItemController::class, 'addOrderLogo']);
     Route::delete('/logos/{orderLogoId}', [OrderItemController::class, 'deleteOrderLogo']);
+});
+
+Route::prefix('v1/orders')->group(function () {
+    Route::get('/edit/{id}', [EditOrderController::class, 'show']);
 });
