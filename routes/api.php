@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\V1\Bill\InvoicedOrderController;
 use App\Http\Controllers\V1\History\ManufacturerOrderController;
+use App\Http\Controllers\V1\Manage\OrderInfoController;
 use App\Http\Controllers\V1\Order\DesingerGetController;
 use App\Http\Controllers\V1\Shipping\GetShippingController;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ use App\Http\Controllers\V1\Product\ColorController;
 use App\Http\Controllers\V1\Shipping\StoreShippingController;
 use App\Http\Controllers\V1\Product\ProductTypeController;
 use App\Http\Controllers\V1\User\CustomerController;
-
+use App\Http\Controllers\V1\Manage\OrderItemController;
 /**
  * API Routes
  * @apiGroup Auth
@@ -162,3 +163,18 @@ Route::middleware('auth:sanctum')->prefix('v1/history')->group(function () {
 });
 
 Route::get('/v1/customers', [CustomerController::class, 'index']);
+
+Route::prefix('v1/manage/orders')->group(function () {
+    Route::delete('/{orderId}', [OrderInfoController::class, 'destroy']);
+    Route::put('/{orderId}/shipping-address', [OrderInfoController::class, 'updateShippingAddress']);
+    Route::put('/{orderId}/invoice-info', [OrderInfoController::class, 'updateInvoiceInfo']);
+    Route::put('/{orderId}/customer-info', [OrderInfoController::class, 'updateCustomerInfo']);
+});
+
+Route::prefix('v1/manage/order-items')->group(function () {
+    Route::delete('/{orderItemId}', [OrderItemController::class, 'deleteOrderItem']);
+    Route::post('/', [OrderItemController::class, 'addOrderItem']);
+    Route::put('/logos/{orderLogoId}', [OrderItemController::class, 'updateLogo']);
+    Route::post('/logos', [OrderItemController::class, 'addOrderLogo']);
+    Route::delete('/logos/{orderLogoId}', [OrderItemController::class, 'deleteOrderLogo']);
+});
