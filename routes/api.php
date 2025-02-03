@@ -176,6 +176,7 @@ Route::prefix('v1/manage/orders')->group(function () {
 Route::prefix('v1/manage/order-items')->group(function () {
     Route::delete('/{orderItemId}', [OrderItemController::class, 'deleteOrderItem']);
     Route::post('/', [OrderItemController::class, 'addOrderItem']);
+    Route::put('/{orderItemId}', [OrderItemController::class, 'updateOrderItem']); 
     Route::put('/logos/{orderLogoId}', [OrderItemController::class, 'updateLogo']);
     Route::post('/logos', [OrderItemController::class, 'addOrderLogo']);
     Route::delete('/logos/{orderLogoId}', [OrderItemController::class, 'deleteOrderLogo']);

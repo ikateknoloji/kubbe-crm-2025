@@ -179,4 +179,53 @@ class OrderItemController extends Controller
             ], 500);
         }
     }
+
+
+    /**
+     * Mevcut sipariş kalemini güncelleme işlemi.
+     * Sipariş sepeti kimliği (order_basket_id) değiştirilemez.
+     */
+    public function updateOrderItem(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'stock_id'   => 'required|integer|exists:stocks,id',
+            'quantity'   => 'required|integer|min:1',
+            'unit_price' => 'required|numeric|min:0.01',
+        ], [
+            'stock_id.required'   => 'Stok kimliği gereklidir.',
+            'stock_id.exists'     => 'Geçersiz stok kimliği.',
+            'quantity.required'   => 'Adet bilgisi gereklidir.',
+            'quantity.min'        => 'Adet en az 1 olmalıdır.',
+            'unit_price.required' => 'Birim fiyat gereklidir.',
+            'unit_price.numeric'  => 'Birim fiyat sayı olmalıdır.',
+            'unit_price.min'      => 'Birim fiyat 0.01 ve üzerinde olmalıdır.',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'mesaj'   => 'Sipariş kalemi güncelleme doğrulama hataları.',
+                'hatalar' => $validator->errors()
+            ], 422);
+        }
+    
+        try {
+            $orderItem = OrderItem::findOrFail($id);
+        
+            // order_basket_id güncellenmez
+            $orderItem->update([
+                'stock_id'   => $request->stock_id,
+                'quantity'   => $request->quantity,
+                'unit_price' => $request->unit_price,
+            ]);
+        
+            return response()->json([
+                'mesaj' => 'Sipariş kalemi başarıyla güncellendi.',
+                'veri'  => $orderItem
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'mesaj' => 'Sipariş kalemi güncellenirken hata oluştu.'
+            ], 500);
+        }
+    }
 }
