@@ -191,4 +191,32 @@ class OrderManageController extends Controller
             return response()->json(['message' => 'Kargo bilgileri kaydedilirken bir hata oluştu.', 'error' =>  $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Siparişin durumunu günceller ancak kargo bilgisi kaydetmez.
+     *
+     * @param  int  $orderId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function storeOfficeDelivery($orderId): JsonResponse
+    {
+        DB::beginTransaction();
+        try {
+            $order = Order::findOrFail($orderId);
+
+            // Sadece sipariş durumunu ve zaman çizelgesini güncelle
+            $order->update(['status' => 'PD']);
+            $order->timeline()->update(['shipped_at' => now()]);
+
+            DB::commit();
+            return response()->json([
+                'message' => "Sipariş '{$order->order_name}' için kargo süreci başlatıldı ancak herhangi bir kargo bilgisi  kaydedilmedi.",
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'İşlem sırasında bir hata oluştu.', 'error' =>  $e->getMessage()],  500);
+        }
+    }
+
 }

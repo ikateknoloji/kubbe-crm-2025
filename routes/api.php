@@ -112,6 +112,7 @@ Route::prefix('v1/orders/manage')->group(function () {
     Route::post('/prepare-for-shipping', [OrderManageController::class, 'prepareForShipping']);
     Route::post('/assign-manufacturer', [OrderManageController::class, 'assignManufacturer']);
     Route::post('/{orderId}/shipping', [OrderManageController::class, 'storeOrderShipping']);
+    Route::post('/{orderId}/take-away', [OrderManageController::class, 'storeOfficeDelivery']);
     Route::post('/{orderId}/images', [OrderManageController::class, 'storeOrderImages']);
 
 });
