@@ -39,23 +39,23 @@ class OrderInfoController extends Controller
     {
         $rules = [
             'shipping_type' => 'required|in:A,G,T',
-            'full_name'     => 'required_unless:shipping_type,T|string|max:200',
-            'address'       => 'required_unless:shipping_type,T|string|max:500',
-            'city'          => 'required_unless:shipping_type,T|string|max:100',
-            'district'      => 'required_unless:shipping_type,T|string|max:100',
-            'country'       => 'required_unless:shipping_type,T|string|max:100',
-            'phone'         => 'required_unless:shipping_type,T|string|max:20',
+            'full_name'     => 'required_if:shipping_type,A,G|string|max:200',
+            'address'       => 'required_if:shipping_type,A,G|string|max:500',
+            'city'          => 'required_if:shipping_type,A,G|string|max:100',
+            'district'      => 'required_if:shipping_type,A,G|string|max:100',
+            'country'       => 'required_if:shipping_type,A,G|string|max:100',
+            'phone'         => 'required_if:shipping_type,A,G|string|max:20',
         ];
     
         $messages = [
             'shipping_type.required'   => 'Teslimat tipi gereklidir.',
-            'shipping_type.in'         => 'Teslimat tipi geçersiz.',
-            'full_name.required_unless' => 'Alıcı adı gereklidir (T hariç).',
-            'address.required_unless'   => 'Adres bilgisi gereklidir (T hariç).',
-            'city.required_unless'      => 'Şehir bilgisi gereklidir (T hariç).',
-            'district.required_unless'  => 'İlçe bilgisi gereklidir (T hariç).',
-            'country.required_unless'   => 'Ülke bilgisi gereklidir (T hariç).',
-            'phone.required_unless'     => 'Telefon bilgisi gereklidir (T hariç).',
+            'shipping_type.in'         => 'Teslimat tipi geçersizdir.',
+            'full_name.required_if'    => 'Alıcı adı gereklidir (A veya G için).',
+            'address.required_if'      => 'Adres bilgisi gereklidir (A veya G için).',
+            'city.required_if'         => 'Şehir bilgisi gereklidir (A veya G için).',
+            'district.required_if'     => 'İlçe bilgisi gereklidir (A veya G için).',
+            'country.required_if'      => 'Ülke bilgisi gereklidir (A veya G için).',
+            'phone.required_if'        => 'Telefon bilgisi gereklidir (A veya G için).',
         ];
     
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -69,12 +69,13 @@ class OrderInfoController extends Controller
     
         try {
             $order = Order::findOrFail($orderId);
+            $order->update(['shipping_type' => $request->shipping_type]);
     
             if ($request->shipping_type === 'T') {
-                if ($order->shippingAddress) {
-                    $order->shippingAddress()->delete();
-                }
+                // Take Away (T) durumunda adres kaydı silinir
+                $order->shippingAddress()->delete();
             } else {
+                // A veya G durumunda adres kaydı yapılır/güncellenir
                 $data = $validator->validated();
                 if ($order->shippingAddress) {
                     $order->shippingAddress()->update($data);
@@ -88,6 +89,7 @@ class OrderInfoController extends Controller
             return response()->json(['mesaj' => 'Teslimat adresi güncellenirken hata oluştu.'], 500);
         }
     }
+    
     
     
     public function updateInvoiceInfo(Request $request, $orderId)
