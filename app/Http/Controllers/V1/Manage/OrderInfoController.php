@@ -37,51 +37,40 @@ class OrderInfoController extends Controller
     // Teslimat adresinin güncellenmesi
     public function updateShippingAddress(Request $request, $orderId)
     {
-        $shippingType = $request->input('shipping_type');
+        $rules = [
+            'shipping_type' => 'required|in:A,G,T',
+            'full_name'     => 'required_unless:shipping_type,T|string|max:200',
+            'address'       => 'required_unless:shipping_type,T|string|max:500',
+            'city'          => 'required_unless:shipping_type,T|string|max:100',
+            'district'      => 'required_unless:shipping_type,T|string|max:100',
+            'country'       => 'required_unless:shipping_type,T|string|max:100',
+            'phone'         => 'required_unless:shipping_type,T|string|max:20',
+        ];
     
-        if ($shippingType === 'T') {
-            $rules = [
-                'shipping_type' => 'required|in:A,G,T',
-            ];
-            $messages = [
-                'shipping_type.required' => 'Teslimat tipi gereklidir.',
-                'shipping_type.in'       => 'Teslimat tipi geçersiz.',
-            ];
-        } else {
-            $rules = [
-                'full_name'     => 'required|string|max:200',
-                'address'       => 'required|string|max:500',
-                'city'          => 'required|string|max:100',
-                'district'      => 'required|string|max:100',
-                'country'       => 'required|string|max:100',
-                'phone'         => 'required|string|max:20',
-                'shipping_type' => 'required|in:A,G,T',
-            ];
-            $messages = [
-                'full_name.required'     => 'Alıcı adı gereklidir.',
-                'address.required'       => 'Adres gereklidir.',
-                'city.required'          => 'Şehir gereklidir.',
-                'district.required'      => 'İlçe gereklidir.',
-                'country.required'       => 'Ülke gereklidir.',
-                'phone.required'         => 'Telefon numarası gereklidir.',
-                'shipping_type.required' => 'Teslimat tipi gereklidir.',
-                'shipping_type.in'       => 'Teslimat tipi geçersiz.',
-            ];
-        }
+        $messages = [
+            'shipping_type.required'   => 'Teslimat tipi gereklidir.',
+            'shipping_type.in'         => 'Teslimat tipi geçersiz.',
+            'full_name.required_unless' => 'Alıcı adı gereklidir (T hariç).',
+            'address.required_unless'   => 'Adres bilgisi gereklidir (T hariç).',
+            'city.required_unless'      => 'Şehir bilgisi gereklidir (T hariç).',
+            'district.required_unless'  => 'İlçe bilgisi gereklidir (T hariç).',
+            'country.required_unless'   => 'Ülke bilgisi gereklidir (T hariç).',
+            'phone.required_unless'     => 'Telefon bilgisi gereklidir (T hariç).',
+        ];
     
         $validator = Validator::make($request->all(), $rules, $messages);
     
         if ($validator->fails()) {
             return response()->json([
-                'mesaj'   => 'Teslimat adresi doğrulama hataları.',
-                'hatalar' => $validator->errors()
+                'mesaj'  => 'Teslimat adresi doğrulama hataları.',
+                'errors' => $validator->errors()
             ], 422);
         }
     
         try {
             $order = Order::findOrFail($orderId);
     
-            if ($shippingType === 'T') {
+            if ($request->shipping_type === 'T') {
                 if ($order->shippingAddress) {
                     $order->shippingAddress()->delete();
                 }
@@ -94,15 +83,12 @@ class OrderInfoController extends Controller
                 }
             }
     
-            return response()->json([
-                'mesaj' => 'Teslimat adresi güncellendi.'
-            ], 200);
+            return response()->json(['mesaj' => 'Teslimat adresi güncellendi.'], 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'mesaj' => 'Teslimat adresi güncellenirken hata oluştu.'
-            ], 500);
+            return response()->json(['mesaj' => 'Teslimat adresi güncellenirken hata oluştu.'], 500);
         }
     }
+    
     
     public function updateInvoiceInfo(Request $request, $orderId)
     {
