@@ -8,7 +8,8 @@ use App\Models\OrderItem;
 use App\Models\OrderLogo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\CustomerOrder;
+use App\Models\ManufacturerOrder;
 class OrderItemController extends Controller
 {
     /**
@@ -212,16 +213,42 @@ class OrderItemController extends Controller
         try {
             $orderItem = OrderItem::findOrFail($id);
         
-            // order_basket_id güncellenmez
             $orderItem->update([
                 'stock_id'   => $request->stock_id,
                 'quantity'   => $request->quantity,
                 'unit_price' => $request->unit_price,
             ]);
+            
             if ($order = optional($orderItem->orderBasket)->order) {
-                $order->update([
-                    'offer_price' => $order->orderItems()->sum(DB::raw('quantity * unit_price'))
-                ]);
+                $offerPrice = $order->orderItems()
+                ->select(DB::raw('SUM(quantity * unit_price) as total'))
+                ->value('total');
+                $order->update(['offer_price' => $offerPrice]);
+
+                // Toplam miktar ve ortalama birim fiyat hesapla
+                $totalAmount = $order->orderItems()->sum('quantity');
+                $averageUnitPrice = $order->orderItems()->avg('unit_price');
+
+                $customerOrder = CustomerOrder::where('order_id', $order->id)->first();
+
+                if ($customerOrder) {
+                    $customerOrder->update([
+                        'customer_id'        => $order->customer_id,
+                        'order_id'           => $order->id,
+                        'total_amount'       => $totalAmount,
+                        'average_unit_price' => $averageUnitPrice,
+                        'total_price'        => $offerPrice,
+                    ]);
+                }
+
+                $manufacturerOrder = ManufacturerOrder::where('order_id', $order->id)->first();
+                if ($manufacturerOrder) {
+                    $manufacturerOrder->update([
+                        'manufacturer_id' => $order->manufacturer_id,
+                        'order_id'        => $order->id,
+                        'total_amount'    => $totalAmount,
+                    ]);
+                }
             }
 
             return response()->json([
