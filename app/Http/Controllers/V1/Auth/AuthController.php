@@ -102,4 +102,17 @@ class AuthController extends Controller
         $path = $file->store('profile_photos', 'public');
         return asset('storage/' . $path);
     }
+
+    /**
+     * Sanctum ile token doğrulama endpoint'i.
+     */
+    public function verifyToken(Request $request)
+    {
+        // Kullanıcı giriş yapmış mı?
+        if (Auth::check()) {
+            return response()->json(['valid' => true, 'message' => 'Token geçerli.']);
+        }
+
+        return response()->json(['valid' => false, 'message' => 'Geçersiz token veya kullanıcı oturumu yok.'], 401);
+    }
 }
