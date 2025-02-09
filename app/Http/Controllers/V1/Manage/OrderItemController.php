@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\OrderItem;
 use App\Models\OrderLogo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class OrderItemController extends Controller
@@ -217,7 +218,12 @@ class OrderItemController extends Controller
                 'quantity'   => $request->quantity,
                 'unit_price' => $request->unit_price,
             ]);
-        
+            if ($order = optional($orderItem->orderBasket)->order) {
+                $order->update([
+                    'offer_price' => $order->orderItems()->sum(DB::raw('quantity * unit_price'))
+                ]);
+            }
+
             return response()->json([
                 'mesaj' => 'Sipariş kalemi başarıyla güncellendi.',
                 'veri'  => $orderItem
