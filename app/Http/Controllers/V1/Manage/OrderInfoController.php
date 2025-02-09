@@ -37,36 +37,63 @@ class OrderInfoController extends Controller
     // Teslimat adresinin güncellenmesi
     public function updateShippingAddress(Request $request, $orderId)
     {
-        $validator = Validator::make($request->all(), [
-            'full_name' => 'required|string|max:200',
-            'address'   => 'required|string|max:500',
-            'city'      => 'required|string|max:100',
-            'district'  => 'required|string|max:100',
-            'country'   => 'required|string|max:100',
-            'phone'     => 'required|string|max:20',
-        ], [
-            'full_name.required' => 'Alıcı adı gereklidir.',
-            'address.required'   => 'Adres gereklidir.',
-            'city.required'      => 'Şehir gereklidir.',
-            'district.required'  => 'İlçe gereklidir.',
-            'country.required'   => 'Ülke gereklidir.',
-            'phone.required'     => 'Telefon numarası gereklidir.',
-        ]);
-
+        $shippingType = $request->input('shipping_type');
+    
+        if ($shippingType === 'T') {
+            $rules = [
+                'shipping_type' => 'required|in:A,G,T',
+            ];
+            $messages = [
+                'shipping_type.required' => 'Teslimat tipi gereklidir.',
+                'shipping_type.in'       => 'Teslimat tipi geçersiz.',
+            ];
+        } else {
+            $rules = [
+                'full_name'     => 'required|string|max:200',
+                'address'       => 'required|string|max:500',
+                'city'          => 'required|string|max:100',
+                'district'      => 'required|string|max:100',
+                'country'       => 'required|string|max:100',
+                'phone'         => 'required|string|max:20',
+                'shipping_type' => 'required|in:A,G,T',
+            ];
+            $messages = [
+                'full_name.required'     => 'Alıcı adı gereklidir.',
+                'address.required'       => 'Adres gereklidir.',
+                'city.required'          => 'Şehir gereklidir.',
+                'district.required'      => 'İlçe gereklidir.',
+                'country.required'       => 'Ülke gereklidir.',
+                'phone.required'         => 'Telefon numarası gereklidir.',
+                'shipping_type.required' => 'Teslimat tipi gereklidir.',
+                'shipping_type.in'       => 'Teslimat tipi geçersiz.',
+            ];
+        }
+    
+        $validator = Validator::make($request->all(), $rules, $messages);
+    
         if ($validator->fails()) {
             return response()->json([
                 'mesaj'   => 'Teslimat adresi doğrulama hataları.',
                 'hatalar' => $validator->errors()
             ], 422);
         }
-
+    
         try {
             $order = Order::findOrFail($orderId);
-            if ($order->shippingAddress) {
-                $order->shippingAddress()->update($validator->validated());
+    
+            if ($shippingType === 'T') {
+                if ($order->shippingAddress) {
+                    $order->shippingAddress()->delete();
+                }
             } else {
-                $order->shippingAddress()->create($validator->validated());
+                $data = $validator->validated();
+                if ($order->shippingAddress) {
+                    $order->shippingAddress()->update($data);
+                } else {
+                    $order->shippingAddress()->create($data);
+                }
             }
+    
             return response()->json([
                 'mesaj' => 'Teslimat adresi güncellendi.'
             ], 200);
@@ -76,8 +103,7 @@ class OrderInfoController extends Controller
             ], 500);
         }
     }
-
-    // Fatura bilgilerinin güncellenmesi
+    
     public function updateInvoiceInfo(Request $request, $orderId)
     {
         $validator = Validator::make($request->all(), [
