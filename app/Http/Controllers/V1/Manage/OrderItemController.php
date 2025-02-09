@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\CustomerOrder;
 use App\Models\ManufacturerOrder;
+use App\Models\Stock;
+
 class OrderItemController extends Controller
 {
     /**
@@ -211,14 +213,34 @@ class OrderItemController extends Controller
         }
     
         try {
+            DB::transaction(function () use ($request, $id) {
+
             $orderItem = OrderItem::findOrFail($id);
         
+            $order = optional($orderItem->orderBasket)->order;
+
+            if (!$order || $order->status !== 'OC') {
+
+                $oldStockId = $orderItem->stock_id;
+                $oldQuantity = $orderItem->quantity;
+                
+                $oldStock = Stock::findOrFail($oldStockId);
+                $oldStock->quantity += $oldQuantity;
+                $oldStock->save();
+
+                $newStock = Stock::findOrFail($request->stock_id);
+                $newStock->quantity -= $request->quantity;
+                $newStock->save();
+            }
+
             $orderItem->update([
                 'stock_id'   => $request->stock_id,
                 'quantity'   => $request->quantity,
                 'unit_price' => $request->unit_price,
             ]);
             
+
+
             if ($order = optional($orderItem->orderBasket)->order) {
                 $offerPrice = $order->orderItems()
                 ->select(DB::raw('SUM(quantity * unit_price) as total'))
@@ -253,8 +275,8 @@ class OrderItemController extends Controller
 
             return response()->json([
                 'mesaj' => 'Sipariş kalemi başarıyla güncellendi.',
-                'veri'  => $orderItem
             ], 200);
+            });
         } catch (\Exception $e) {
             return response()->json([
                 'mesaj' => 'Sipariş kalemi güncellenirken hata oluştu.'
