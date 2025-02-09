@@ -21,10 +21,10 @@ class ProductTypeSeeder extends Seeder
             ['product_type' => 'Silindir', 'category' => 'Mikrofon Süngeri'],
             ['product_type' => 'Kısa Silindir', 'category' => 'Mikrofon Süngeri'],
             ['product_type' => 'Top', 'category' => 'Mikrofon Süngeri'],
-            ['product_type' => 'Üçgen Sünger', 'category' => 'Reklam Küpü'],
-            ['product_type' => 'Dörtgen Sünger', 'category' => 'Reklam Küpü'],
-            ['product_type' => 'Plastik Üçgen', 'category' => 'Reklam Küpü'],
-            ['product_type' => 'Plastik Kare', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Reklam Üçgen Sünger', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Reklam Dörtgen Sünger', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Reklam Plastik Üçgen', 'category' => 'Reklam Küpü'],
+            ['product_type' => 'Reklam Plastik Kare', 'category' => 'Reklam Küpü'],
         ];
 
         foreach ($types as $type) {
