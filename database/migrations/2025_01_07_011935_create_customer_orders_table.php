@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('customer_orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('order_id')->unique()->constrained('orders')->onDelete(action: 'cascade'); 
+            $table->foreignId('order_id')->unique()->constrained('orders')
+            ->onDelete('cascade'); 
             $table->unsignedBigInteger('total_amount'); 
             $table->decimal('average_unit_price', 10, 2);
             $table->decimal('total_price', 12, 2);

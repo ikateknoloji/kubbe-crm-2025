@@ -37,6 +37,15 @@ class Order extends Model
         'status' => OrderStatus::class,
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+    
+        static::deleting(function (Order $order) {
+            $order->customerOrder()->delete();
+            $order->manufacturerOrder()->delete();
+        });
+    }
 
     public function customer()
     {
@@ -112,5 +121,16 @@ class Order extends Model
     {
         return $this->hasOne(OrderShipping::class);
     }
+
+    public function manufacturerOrder()
+    {
+        return $this->hasOne(ManufacturerOrder::class, 'order_id');
+    }
+
+    public function customerOrder()
+    {
+        return $this->hasOne(CustomerOrder::class, 'order_id');
+    }
+
 
 }
