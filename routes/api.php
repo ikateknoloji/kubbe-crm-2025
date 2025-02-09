@@ -31,6 +31,7 @@ use App\Http\Controllers\V1\Product\ProductTypeController;
 use App\Http\Controllers\V1\User\CustomerController;
 use App\Http\Controllers\V1\Manage\OrderItemController;
 use App\Http\Controllers\V1\Order\EditOrderController;
+use App\Http\Controllers\V1\User\UserController;
 
 /**
  * API Routes
@@ -55,6 +56,10 @@ Route::prefix('v1/auth')->group(function () {
        Route::get('/', [RoleController::class, 'getRoles'])->name('roles.getRoles'); 
        Route::post('/update-user-roles', [RoleController::class, 'updateUserRoles'])->name('roles.updateUserRoles');
    });
+});
+
+Route::prefix('v1/users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
 });
 
 Route::prefix('v1/product')->group(function () {
