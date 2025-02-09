@@ -59,7 +59,7 @@ Route::prefix('v1/auth')->group(function () {
 });
 
 Route::prefix('v1/users')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
+    Route::get('', [UserController::class, 'index']);
 });
 
 Route::prefix('v1/product')->group(function () {
