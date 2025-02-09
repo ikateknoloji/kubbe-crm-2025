@@ -69,14 +69,22 @@ class OrderInfoController extends Controller
     
         try {
             $order = Order::findOrFail($orderId);
+            
+            // **Sadece siparişte shipping_type güncelleniyor**
             $order->update(['shipping_type' => $request->shipping_type]);
     
             if ($request->shipping_type === 'T') {
-                // Take Away (T) durumunda adres kaydı silinir
-                $order->shippingAddress()->delete();
+                // **Take Away (T) durumunda adres kaydı silinir**
+                if ($order->shippingAddress) {
+                    $order->shippingAddress()->delete();
+                }
             } else {
-                // A veya G durumunda adres kaydı yapılır/güncellenir
+                // **A veya G durumunda adres kaydı yapılır/güncellenir**
                 $data = $validator->validated();
+                
+                // `shipping_type` verisini çıkarıyoruz, çünkü ShippingAddress'ta tutulmayacak.
+                unset($data['shipping_type']);
+    
                 if ($order->shippingAddress) {
                     $order->shippingAddress()->update($data);
                 } else {
@@ -93,7 +101,7 @@ class OrderInfoController extends Controller
         }
     }
     
-    
+
     
     public function updateInvoiceInfo(Request $request, $orderId)
     {
