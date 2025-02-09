@@ -86,7 +86,10 @@ class OrderInfoController extends Controller
     
             return response()->json(['mesaj' => 'Teslimat adresi güncellendi.'], 200);
         } catch (\Exception $e) {
-            return response()->json(['mesaj' => 'Teslimat adresi güncellenirken hata oluştu.'], 500);
+            return response()->json([
+                'mesaj' => 'Teslimat adresi güncellenirken hata oluştu: ' . $e->getMessage(),
+                'hata_detay' => $e->getTraceAsString()
+            ], 500);
         }
     }
     
